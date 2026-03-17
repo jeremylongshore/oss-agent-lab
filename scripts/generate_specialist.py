@@ -6,6 +6,7 @@ Usage:
 
 Copies _template/, populates from repo README/metadata, generates stubs.
 """
+
 import argparse
 import shutil
 from pathlib import Path

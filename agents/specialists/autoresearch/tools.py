@@ -43,9 +43,7 @@ def generate_hypothesis(topic: str, context: dict[str, Any] | None = None) -> di
     }
 
 
-def run_experiment(
-    hypothesis: str, method: str = "literature_review"
-) -> dict[str, Any]:
+def run_experiment(hypothesis: str, method: str = "literature_review") -> dict[str, Any]:
     experiment_id = str(uuid.uuid4())[:8]
     findings_map: dict[str, list[dict[str, Any]]] = {
         "literature_review": [

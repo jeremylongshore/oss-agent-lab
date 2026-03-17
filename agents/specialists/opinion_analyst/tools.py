@@ -39,14 +39,48 @@ def analyze_sentiment(text: str, granularity: str = "document") -> dict[str, Any
     text_lower = text.lower()
 
     positive_terms = {
-        "good", "great", "excellent", "love", "amazing", "wonderful", "best",
-        "fantastic", "brilliant", "outstanding", "superb", "positive", "happy",
-        "glad", "pleased", "support", "approve", "like", "enjoy", "beneficial",
+        "good",
+        "great",
+        "excellent",
+        "love",
+        "amazing",
+        "wonderful",
+        "best",
+        "fantastic",
+        "brilliant",
+        "outstanding",
+        "superb",
+        "positive",
+        "happy",
+        "glad",
+        "pleased",
+        "support",
+        "approve",
+        "like",
+        "enjoy",
+        "beneficial",
     }
     negative_terms = {
-        "bad", "terrible", "awful", "hate", "horrible", "worst", "poor",
-        "disappointing", "negative", "sad", "angry", "oppose", "dislike",
-        "harmful", "wrong", "fail", "failure", "problem", "issue", "concern",
+        "bad",
+        "terrible",
+        "awful",
+        "hate",
+        "horrible",
+        "worst",
+        "poor",
+        "disappointing",
+        "negative",
+        "sad",
+        "angry",
+        "oppose",
+        "dislike",
+        "harmful",
+        "wrong",
+        "fail",
+        "failure",
+        "problem",
+        "issue",
+        "concern",
     }
 
     words = text_lower.split()
@@ -80,11 +114,13 @@ def analyze_sentiment(text: str, granularity: str = "document") -> dict[str, Any
             hits = [w for w in words if w.strip(".,!?;:") in keywords]
             if hits:
                 aspect_score = raw_score * 0.8
-                aspects.append({
-                    "aspect": aspect_name,
-                    "sentiment": sentiment,
-                    "score": round(aspect_score, 4),
-                })
+                aspects.append(
+                    {
+                        "aspect": aspect_name,
+                        "sentiment": sentiment,
+                        "score": round(aspect_score, 4),
+                    }
+                )
 
     return {
         "sentiment": sentiment,
@@ -122,18 +158,28 @@ def detect_stance(text: str, target: str) -> dict[str, Any]:
     target_lower = target.lower()
 
     support_patterns = [
-        f"support {target_lower}", f"agree with {target_lower}",
-        f"in favour of {target_lower}", f"in favor of {target_lower}",
-        f"backing {target_lower}", f"endorse {target_lower}",
-        f"{target_lower} is good", f"{target_lower} is great",
-        f"{target_lower} is right", f"for {target_lower}",
+        f"support {target_lower}",
+        f"agree with {target_lower}",
+        f"in favour of {target_lower}",
+        f"in favor of {target_lower}",
+        f"backing {target_lower}",
+        f"endorse {target_lower}",
+        f"{target_lower} is good",
+        f"{target_lower} is great",
+        f"{target_lower} is right",
+        f"for {target_lower}",
     ]
     oppose_patterns = [
-        f"oppose {target_lower}", f"against {target_lower}",
-        f"disagree with {target_lower}", f"reject {target_lower}",
-        f"{target_lower} is bad", f"{target_lower} is wrong",
-        f"{target_lower} is harmful", f"anti-{target_lower}",
-        f"opposed to {target_lower}", f"criticise {target_lower}",
+        f"oppose {target_lower}",
+        f"against {target_lower}",
+        f"disagree with {target_lower}",
+        f"reject {target_lower}",
+        f"{target_lower} is bad",
+        f"{target_lower} is wrong",
+        f"{target_lower} is harmful",
+        f"anti-{target_lower}",
+        f"opposed to {target_lower}",
+        f"criticise {target_lower}",
         f"criticize {target_lower}",
     ]
 
@@ -146,15 +192,11 @@ def detect_stance(text: str, target: str) -> dict[str, Any]:
         score = sentiment_result["overall_score"]
         if score > 0.1:
             stance = "support"
-            reasoning = (
-                f"Text carries a positive tone that implies support for '{target}'."
-            )
+            reasoning = f"Text carries a positive tone that implies support for '{target}'."
             confidence = sentiment_result["confidence"] * 0.6
         elif score < -0.1:
             stance = "oppose"
-            reasoning = (
-                f"Text carries a negative tone that implies opposition to '{target}'."
-            )
+            reasoning = f"Text carries a negative tone that implies opposition to '{target}'."
             confidence = sentiment_result["confidence"] * 0.6
         else:
             stance = "neutral"
@@ -166,22 +208,16 @@ def detect_stance(text: str, target: str) -> dict[str, Any]:
         if len(support_hits) > len(oppose_hits):
             stance = "support"
             reasoning = (
-                f"Found {len(support_hits)} supporting expression(s) referencing"
-                f" '{target}'."
+                f"Found {len(support_hits)} supporting expression(s) referencing '{target}'."
             )
             confidence = min(0.95, 0.6 + len(support_hits) * 0.1)
         elif len(oppose_hits) > len(support_hits):
             stance = "oppose"
-            reasoning = (
-                f"Found {len(oppose_hits)} opposing expression(s) referencing"
-                f" '{target}'."
-            )
+            reasoning = f"Found {len(oppose_hits)} opposing expression(s) referencing '{target}'."
             confidence = min(0.95, 0.6 + len(oppose_hits) * 0.1)
         else:
             stance = "neutral"
-            reasoning = (
-                "Equal supporting and opposing signals detected — stance is mixed."
-            )
+            reasoning = "Equal supporting and opposing signals detected — stance is mixed."
             confidence = 0.5
 
     return {
@@ -229,26 +265,69 @@ def measure_bias(
 
     dimension_signals: dict[str, list[str]] = {
         "political": [
-            "liberal", "conservative", "democrat", "republican", "left-wing",
-            "right-wing", "socialist", "capitalist", "progressive", "radical",
-            "regime", "establishment", "elites", "patriots",
+            "liberal",
+            "conservative",
+            "democrat",
+            "republican",
+            "left-wing",
+            "right-wing",
+            "socialist",
+            "capitalist",
+            "progressive",
+            "radical",
+            "regime",
+            "establishment",
+            "elites",
+            "patriots",
         ],
         "emotional": [
-            "outrage", "shocking", "horrifying", "disgusting", "devastating",
-            "incredible", "unbelievable", "alarming", "explosive", "bombshell",
-            "crisis", "catastrophe", "disaster", "miracle",
+            "outrage",
+            "shocking",
+            "horrifying",
+            "disgusting",
+            "devastating",
+            "incredible",
+            "unbelievable",
+            "alarming",
+            "explosive",
+            "bombshell",
+            "crisis",
+            "catastrophe",
+            "disaster",
+            "miracle",
         ],
         "framing": [
-            "so-called", "allegedly", "claimed", "supposedly", "admitted",
-            "confessed", "refuses to", "fails to", "forced to", "despite",
+            "so-called",
+            "allegedly",
+            "claimed",
+            "supposedly",
+            "admitted",
+            "confessed",
+            "refuses to",
+            "fails to",
+            "forced to",
+            "despite",
         ],
         "source": [
-            "anonymous source", "insider", "expert says", "studies show",
-            "everyone knows", "many people", "some say", "reports claim",
+            "anonymous source",
+            "insider",
+            "expert says",
+            "studies show",
+            "everyone knows",
+            "many people",
+            "some say",
+            "reports claim",
         ],
         "confirmation": [
-            "as expected", "of course", "obviously", "clearly", "naturally",
-            "as we knew", "proven again", "confirms what", "yet again",
+            "as expected",
+            "of course",
+            "obviously",
+            "clearly",
+            "naturally",
+            "as we knew",
+            "proven again",
+            "confirms what",
+            "yet again",
         ],
     }
 
@@ -257,10 +336,7 @@ def measure_bias(
 
     for dim in dims:
         signals = dimension_signals.get(dim, [])
-        hit_count = sum(
-            1 for signal in signals
-            if signal in text_lower
-        )
+        hit_count = sum(1 for signal in signals if signal in text_lower)
         raw = hit_count / max(len(signals), 1)
         score = min(1.0, raw * 3.0)
         scores[dim] = round(score, 4)

@@ -81,7 +81,8 @@ def detect_elements(url: str, description: str | None = None) -> dict[str, Any]:
     if description:
         keywords = description.lower().split()
         filtered = [
-            el for el in base_elements
+            el
+            for el in base_elements
             if any(kw in el["text"].lower() or kw in el["type"].lower() for kw in keywords)
         ]
         elements = filtered if filtered else base_elements[:2]
@@ -128,9 +129,7 @@ def interact_element(
     """
     supported_actions = {"click", "type", "hover", "focus", "clear"}
     if action not in supported_actions:
-        raise ValueError(
-            f"action must be one of {sorted(supported_actions)!r}; got {action!r}"
-        )
+        raise ValueError(f"action must be one of {sorted(supported_actions)!r}; got {action!r}")
     if action == "type" and not value:
         raise ValueError("value must be provided when action is 'type'")
     if not element_id.strip():

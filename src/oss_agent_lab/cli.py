@@ -1,4 +1,5 @@
 """CLI entry point for OSS Agent Lab."""
+
 import click
 from rich.console import Console
 

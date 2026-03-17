@@ -40,9 +40,7 @@ class SandboxSpecialist(BaseSpecialist):
     """
 
     name: ClassVar[str] = "sandbox"
-    description: ClassVar[str] = (
-        "Safe multi-language code execution via alibaba/OpenSandbox"
-    )
+    description: ClassVar[str] = "Safe multi-language code execution via alibaba/OpenSandbox"
     source_repo: ClassVar[str] = "alibaba/OpenSandbox"
     capabilities: ClassVar[list[str]] = [
         "execute",

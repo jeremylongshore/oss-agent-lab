@@ -56,7 +56,7 @@ def _parse_trending_html(html: str) -> list[dict[str, Any]]:
     # Each trending article contains the repo slug in an h2 > a href
     re.compile(
         r'href="/([a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+)"[^>]*>\s*'
-        r'<span[^>]*>[^<]*</span>\s*/\s*<span[^>]*>([^<]+)</span>',
+        r"<span[^>]*>[^<]*</span>\s*/\s*<span[^>]*>([^<]+)</span>",
         re.DOTALL,
     )
 
@@ -72,7 +72,7 @@ def _parse_trending_html(html: str) -> list[dict[str, Any]]:
     )
 
     # Split by article tags to get per-repo blocks
-    article_blocks = re.split(r'<article\b', html)[1:]
+    article_blocks = re.split(r"<article\b", html)[1:]
 
     for position, block in enumerate(article_blocks, start=1):
         if position > _MAX_POSITION:
@@ -89,10 +89,10 @@ def _parse_trending_html(html: str) -> list[dict[str, Any]]:
 
         # Stars — look for star count text
         stars = 0
-        star_match = re.search(r'([\d,]+)\s+stars\s+this', block)
+        star_match = re.search(r"([\d,]+)\s+stars\s+this", block)
         if not star_match:
             # Fallback: any integer near "starred" text
-            star_match = re.search(r'([\d,]+)\s+star', block)
+            star_match = re.search(r"([\d,]+)\s+star", block)
         if star_match:
             try:
                 stars = int(star_match.group(1).replace(",", ""))
@@ -108,7 +108,7 @@ def _parse_trending_html(html: str) -> list[dict[str, Any]]:
         )
         if desc_match:
             raw = desc_match.group(1)
-            description = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', raw)).strip()
+            description = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", raw)).strip()
 
         results.append(
             {

@@ -47,7 +47,7 @@ _DANGEROUS_PATTERNS: dict[str, list[tuple[str, str]]] = {
     ],
     "javascript": [
         ("require('child_process')", "child_process can spawn shell commands."),
-        ("require(\"child_process\")", "child_process can spawn shell commands."),
+        ('require("child_process")', "child_process can spawn shell commands."),
         ("eval(", "eval() executes arbitrary code strings."),
         ("Function(", "Function constructor executes code strings."),
         ("fs.writeFile", "File write detected outside allowed paths."),

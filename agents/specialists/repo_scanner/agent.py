@@ -151,9 +151,7 @@ class RepoScannerSpecialist(BaseSpecialist):
         # Stage 3 — conditional scaffolding.
         scaffold: dict[str, Any] | None = None
         if score["estimated_score"] >= _AUTO_SCAFFOLD_THRESHOLD:
-            specialist_name: str = str(
-                params.get("name") or scan["name_suggestion"]
-            )
+            specialist_name: str = str(params.get("name") or scan["name_suggestion"])
             scaffold = scaffold_specialist(repo=repo, name=specialist_name)
 
         duration_ms = (time.perf_counter() - t_start) * 1000.0

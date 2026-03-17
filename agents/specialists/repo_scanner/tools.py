@@ -107,9 +107,9 @@ def scan_repo(repo: str) -> dict[str, Any]:
         ]
 
     # Simulate structural presence signals from seed.
-    has_python = (seed % 5) != 0          # ~80% of repos
-    has_tests = (seed % 3) != 0           # ~67% of repos
-    has_readme = (seed % 7) != 0          # ~86% of repos
+    has_python = (seed % 5) != 0  # ~80% of repos
+    has_tests = (seed % 3) != 0  # ~67% of repos
+    has_readme = (seed % 7) != 0  # ~86% of repos
 
     # Simple recommendation derived from simulated score.
     estimated = _estimate_score_from_seed(seed)
@@ -168,17 +168,11 @@ def scaffold_specialist(repo: str, name: str) -> dict[str, Any]:
     expected_files = ["__init__.py", "agent.py", "tools.py", "SKILL.md"]
 
     if target_dir.exists():
-        raise FileExistsError(
-            f"Specialist directory already exists: {target_dir}"
-        )
+        raise FileExistsError(f"Specialist directory already exists: {target_dir}")
 
     if template_dir.exists() and template_dir.is_dir():
         shutil.copytree(str(template_dir), str(target_dir))
-        files = [
-            entry.name
-            for entry in sorted(target_dir.iterdir())
-            if entry.is_file()
-        ]
+        files = [entry.name for entry in sorted(target_dir.iterdir()) if entry.is_file()]
         status = "created"
     else:
         # Template absent — return a simulated result so the pipeline proceeds.

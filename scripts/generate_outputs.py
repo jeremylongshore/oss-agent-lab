@@ -8,6 +8,7 @@ Usage:
     python scripts/generate_outputs.py agents/specialists/autoresearch/
     python scripts/generate_outputs.py agents/specialists/autoresearch/ --output-dir ./my_output
 """
+
 from __future__ import annotations
 
 import argparse
@@ -124,7 +125,7 @@ ALLOWED_TOOLS: list[str] = [{tools_list}]
 
 def run(
     query: str,
-    action: str = "{meta.capabilities[0] if meta.capabilities else 'run'}",
+    action: str = "{meta.capabilities[0] if meta.capabilities else "run"}",
     domain: str = "general",
     parameters: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -144,7 +145,7 @@ def run(
 
 async def run_async(
     query: str,
-    action: str = "{meta.capabilities[0] if meta.capabilities else 'run'}",
+    action: str = "{meta.capabilities[0] if meta.capabilities else "run"}",
     domain: str = "general",
     parameters: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -217,7 +218,7 @@ def cli() -> None:
 @click.argument("query")
 @click.option(
     "--action",
-    default="{meta.capabilities[0] if meta.capabilities else 'run'}",
+    default="{meta.capabilities[0] if meta.capabilities else "run"}",
     show_default=True,
     help="Intent action ({caps_help}).",
 )
@@ -258,8 +259,8 @@ def cmd_info() -> None:
     click.echo(f"Version:      {meta.version}")
     click.echo(f"Source:       {meta.source_repo}")
     click.echo(f"Description:  {meta.description}")
-    click.echo(f"Capabilities: {', '.join(meta.capabilities)}")
-    click.echo(f"Tools:        {', '.join(meta.allowed_tools)}")
+    click.echo(f"Capabilities: {", ".join(meta.capabilities)}")
+    click.echo(f"Tools:        {", ".join(meta.allowed_tools)}")
 
 
 async def _execute(
@@ -520,7 +521,7 @@ class {short_name}Skill:
             "status" and "specialist_name".
         """
         query: str = inputs["query"]
-        action: str = inputs.get("action", "{meta.capabilities[0] if meta.capabilities else 'run'}")
+        action: str = inputs.get("action", "{meta.capabilities[0] if meta.capabilities else "run"}")
         domain: str = inputs.get("domain", "general")
         parameters: dict[str, Any] = inputs.get("parameters", {{}})
 
@@ -605,8 +606,8 @@ class RunRequest(BaseModel):
 
     query: str = Field(..., description="The user query or topic.")
     action: str = Field(
-        default="{meta.capabilities[0] if meta.capabilities else 'run'}",
-        description="Intent action ({', '.join(meta.capabilities)}).",
+        default="{meta.capabilities[0] if meta.capabilities else "run"}",
+        description="Intent action ({", ".join(meta.capabilities)}).",
     )
     domain: str = Field(default="general", description="Intent domain.")
     parameters: dict[str, Any] = Field(

@@ -154,18 +154,10 @@ class OpinionAnalystSpecialist(BaseSpecialist):
         result: dict[str, Any] = {}
 
         run_sentiment = (
-            "sentiment" in action
-            or "analyze_sentiment" in tools_requested
-            or not tools_requested
+            "sentiment" in action or "analyze_sentiment" in tools_requested or not tools_requested
         )
-        run_stance = (
-            "stance" in action
-            or "detect_stance" in tools_requested
-        )
-        run_bias = (
-            "bias" in action
-            or "measure_bias" in tools_requested
-        )
+        run_stance = "stance" in action or "detect_stance" in tools_requested
+        run_bias = "bias" in action or "measure_bias" in tools_requested
 
         if run_sentiment:
             granularity: str = params.get("granularity", "document")

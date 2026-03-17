@@ -14,7 +14,7 @@ WATCH_THRESHOLD = 40
 
 # Weight distribution for composite score
 DISCOVERY_WEIGHT = 0.40  # "Is this trending?"
-QUALITY_WEIGHT = 0.35    # "Is this production-ready?"
+QUALITY_WEIGHT = 0.35  # "Is this production-ready?"
 DURABILITY_WEIGHT = 0.25  # "Will this last?"
 
 # Individual signal weights within each category
