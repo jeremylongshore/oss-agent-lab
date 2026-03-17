@@ -211,7 +211,7 @@ cd oss-agent-lab
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
-# Run all tests (120+ tests across 10 specialists)
+# Run all tests (189 tests across 10 specialists)
 pytest tests/
 
 # Score a GitHub repo
@@ -286,7 +286,7 @@ oss-agent-lab/
 ├── scripts/
 │   ├── generate_outputs.py     # Multi-format wrapper generator
 │   └── generate_specialist.py  # Auto-scaffold from template
-├── tests/                      # 120+ tests, 85%+ coverage
+├── tests/                      # 189 tests, 76% coverage
 └── 000-docs/                   # Project documentation (NNN-CC-ABCD filing)
 ```
 

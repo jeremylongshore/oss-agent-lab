@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oss-agent-lab"
-version = "0.1.0"
+version = "1.0.0"
 description = "Turn trending repos into instant capabilities for any AI framework"
 readme = "README.md"
 license = "MIT"
