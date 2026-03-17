@@ -26,10 +26,12 @@ class TestConductorAgent:
         with patch("agents.conductor.agent.anthropic") as mock_anthropic:
             mock_client = AsyncMock()
             mock_anthropic.AsyncAnthropic.return_value = mock_client
+            intent_json = (
+                '{"action": "research", "domain": "ai",'
+                ' "confidence": 0.92, "parameters": {"topic": "transformers"}}'
+            )
             mock_client.messages.create = AsyncMock(
-                return_value=self._make_api_response(
-                    '{"action": "research", "domain": "ai", "confidence": 0.92, "parameters": {"topic": "transformers"}}'
-                )
+                return_value=self._make_api_response(intent_json)
             )
 
             from agents.conductor.agent import ConductorAgent
@@ -51,10 +53,12 @@ class TestConductorAgent:
         with patch("agents.conductor.agent.anthropic") as mock_anthropic:
             mock_client = AsyncMock()
             mock_anthropic.AsyncAnthropic.return_value = mock_client
+            intent_json = (
+                '{"action": "analyze", "domain": "finance",'
+                ' "confidence": 0.85, "parameters": {"ticker": "AAPL"}}'
+            )
             mock_client.messages.create = AsyncMock(
-                return_value=self._make_api_response(
-                    '{"action": "analyze", "domain": "finance", "confidence": 0.85, "parameters": {"ticker": "AAPL"}}'
-                )
+                return_value=self._make_api_response(intent_json)
             )
 
             from agents.conductor.agent import ConductorAgent
