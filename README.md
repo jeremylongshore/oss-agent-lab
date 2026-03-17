@@ -2,6 +2,7 @@
 
 **Turn trending repos into instant capabilities for any AI framework.**
 
+[![Validate](https://github.com/jeremylongshore/oss-agent-lab/actions/workflows/validate.yml/badge.svg)](https://github.com/jeremylongshore/oss-agent-lab/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![Claude Agent SDK](https://img.shields.io/badge/built%20with-Claude%20Agent%20SDK-blueviolet.svg)](https://github.com/anthropics/anthropic-sdk-python)
@@ -23,7 +24,7 @@ That last gap is what we build.
 
 ## What OSS Agent Lab Does
 
-OSS Agent Lab is a **capability factory**. It auto-discovers trending repositories from 6+ sources, scores them on a composite 0-100 scale, and wraps the top scorers into **5 output formats**:
+OSS Agent Lab is a **capability factory**. It auto-discovers trending repositories from 7 sources, scores them on a composite 0-100 scale, and wraps the top scorers into **5 output formats**:
 
 | Format | Use Case |
 |--------|----------|
@@ -44,46 +45,43 @@ graph TD
     subgraph L0["Temporal Capability Index"]
         S1["GitHub Trending"]
         S2["Hacker News"]
-        S3["Papers With Code"]
-        S4["Reddit r/MachineLearning"]
-        S5["ArXiv CS.AI"]
-        S6["X / Social Signals"]
-        CE["Capability Evaluator<br/>Composite Score 0-100"]
-        IDX[("Capability Index<br/>(scored + ranked)")]
-        S1 --> CE
-        S2 --> CE
-        S3 --> CE
-        S4 --> CE
-        S5 --> CE
-        S6 --> CE
+        S3["OSSInsight"]
+        S4["Reddit"]
+        S5["Trendshift"]
+        S6["DevHunt"]
+        S7["The Rundown"]
+        CE["Capability Scorer<br/>Weighted Composite 0-100"]
+        IDX[("Temporal Index<br/>(scored + time-series)")]
+        S1 & S2 & S3 & S4 --> CE
+        S5 & S6 & S7 --> CE
         CE --> IDX
     end
 
     subgraph L1["Tier 1: Conductor"]
         NL["Natural Language Input"]
-        IC["Intent Classifier"]
-        TD["Task Decomposer"]
-        NL --> IC --> TD
+        IC["Intent Classifier<br/>(Claude SDK)"]
+        NL --> IC
     end
 
     subgraph L2["Tier 2: Router"]
+        REG["Specialist Registry<br/>(SKILL.md auto-discovery)"]
         CM["Capability Matcher"]
-        DP["Dispatch Engine"]
+        DP["Parallel Dispatch"]
         AG["Result Aggregator"]
-        CM --> DP --> AG
+        REG --> CM --> DP --> AG
     end
 
-    subgraph L3["Tier 3: Specialists"]
+    subgraph L3["Tier 3: Specialists (10)"]
         SP1["autoresearch"]
-        SP2["swarm-predict"]
-        SP3["deer-flow"]
-        SP4["browser-ai"]
-        SP5["knowledge-graph"]
-        SP6["stock-analyst"]
-        SP7["opinion-analyst"]
-        SP8["gui-agent"]
+        SP2["swarm_predict"]
+        SP3["deer_flow"]
+        SP4["browser_ai"]
+        SP5["knowledge_graph"]
+        SP6["stock_analyst"]
+        SP7["opinion_analyst"]
+        SP8["gui_agent"]
         SP9["sandbox"]
-        SP10["repo-scanner"]
+        SP10["repo_scanner ★"]
     end
 
     subgraph OUT["Output Formats"]
@@ -94,8 +92,8 @@ graph TD
         O5["REST API"]
     end
 
-    IDX -. "scores inform" .-> CM
-    TD --> CM
+    IDX -. "scores inform routing" .-> CM
+    IC --> CM
     DP --> SP1 & SP2 & SP3 & SP4 & SP5
     DP --> SP6 & SP7 & SP8 & SP9 & SP10
     SP1 & SP2 & SP3 & SP4 & SP5 --> AG
@@ -103,43 +101,76 @@ graph TD
     AG --> O1 & O2 & O3 & O4 & O5
 ```
 
-**Layer 0 -- Temporal Capability Index** continuously scrapes 6+ sources and scores every discovered repo. **Tier 1 -- Conductor** accepts natural language, classifies intent, and decomposes complex queries into sub-tasks. **Tier 2 -- Router** matches sub-tasks to the best-scoring specialists and aggregates their results. **Tier 3 -- Specialists** are plug-and-play wrappers around proven open-source repos.
+**Layer 0 -- Temporal Capability Index** scrapes 7 sources and computes a weighted composite score for every discovered repo. **Tier 1 -- Conductor** accepts natural language, classifies intent via Claude SDK. **Tier 2 -- Router** matches intent to specialists via a registry that auto-discovers from SKILL.md frontmatter, dispatches in parallel, and aggregates results. **Tier 3 -- Specialists** are plug-and-play wrappers around proven open-source repos. The `repo_scanner` meta-specialist (★) auto-generates new specialists when repos cross the scoring threshold.
 
 ---
 
 ## Specialist Matrix
 
-| # | Specialist | Wraps | What It Does |
+| # | Specialist | Wraps | Capabilities |
 |---|-----------|-------|-------------|
-| 1 | `autoresearch` | [karpathy/autoresearch](https://github.com/karpathy/autoresearch) | Self-improving research loops -- feed a question, get a paper-grade answer |
-| 2 | `swarm-predict` | [666ghj/MiroFish](https://github.com/666ghj/MiroFish) | Swarm intelligence predictions across markets and events |
-| 3 | `deer-flow` | [bytedance/deer-flow](https://github.com/bytedance/deer-flow) | Full-stack research + code generation pipelines |
-| 4 | `browser-ai` | [lightpanda-io/browser](https://github.com/nicepkg/gpt-runner) | Headless web automation for data extraction and interaction |
-| 5 | `knowledge-graph` | GitNexus + [cognee](https://github.com/topoteretes/cognee) | Code knowledge graphs with RAG-powered querying |
-| 6 | `stock-analyst` | [ai-hedge-fund](https://github.com/virattt/ai-hedge-fund) + daily_stock | Multi-signal financial analysis and reporting |
-| 7 | `opinion-analyst` | [666ghj/BettaFish](https://github.com/666ghj/BettaFish) | Sentiment analysis at scale across social platforms |
-| 8 | `gui-agent` | [alibaba/page-agent](https://github.com/anthropics/anthropic-quickstarts) | Natural language control of web UIs |
-| 9 | `sandbox` | [alibaba/OpenSandbox](https://github.com/anthropics/anthropic-quickstarts) | Safe, isolated code execution environments |
-| 10 | `repo-scanner` | META | Auto-generates new specialist scaffolds from trending repos |
+| 1 | `autoresearch` | [karpathy/autoresearch](https://github.com/karpathy/autoresearch) | Hypothesis generation, experiment design, result analysis |
+| 2 | `swarm_predict` | [666ghj/MiroFish](https://github.com/666ghj/MiroFish) | Multi-model swarm predictions, consensus aggregation |
+| 3 | `deer_flow` | [bytedance/deer-flow](https://github.com/bytedance/deer-flow) | Research pipelines, code generation, artifact creation |
+| 4 | `browser_ai` | [lightpanda-io/browser](https://github.com/nicepkg/gpt-runner) | Headless navigation, content extraction, screenshots |
+| 5 | `knowledge_graph` | [GitNexus](https://github.com/abhigyanpatwari/GitNexus) + [cognee](https://github.com/topoteretes/cognee) | Graph construction, relationship queries, Graph RAG |
+| 6 | `stock_analyst` | [ai-hedge-fund](https://github.com/virattt/ai-hedge-fund) | Ticker analysis, technical indicators, news sentiment |
+| 7 | `opinion_analyst` | [666ghj/BettaFish](https://github.com/666ghj/BettaFish) | Sentiment analysis, stance detection, bias measurement |
+| 8 | `gui_agent` | [alibaba/page-agent](https://github.com/anthropics/anthropic-quickstarts) | Element detection, UI interaction, form filling |
+| 9 | `sandbox` | [alibaba/OpenSandbox](https://github.com/anthropics/anthropic-quickstarts) | Safe code execution, validation, multi-runtime |
+| 10 | `repo_scanner` | META (this repo) | Auto-discovery, repo scoring, specialist scaffolding |
 
-Specialist #10 is the meta-specialist: it watches the Capability Index and proposes new specialists when a repo crosses the auto-scaffold threshold.
+Every specialist follows the same contract (`BaseSpecialist`), produces all 5 output formats, and is independently testable.
+
+---
+
+## Capability Scoring Engine
+
+Every repo in the index gets a **Capability Score** from 0 to 100:
+
+```
+Score = 40% Discovery + 35% Quality + 25% Durability
+```
+
+| Signal Group | Weight | Sources |
+|-------------|--------|---------|
+| **Discovery** | 40% | GitHub star velocity, trending position, HN frontpage, DevHunt upvotes, Rundown mentions |
+| **Quality** | 35% | README quality, test coverage, API surface clarity, license compatibility, maintenance activity |
+| **Durability** | 25% | Contributor diversity, OSSInsight growth curve, Trendshift momentum, dependency health, community depth |
+
+**15 weighted signals** from 7 live sources, computed into a time-series index that detects rising, peaked, and declining repos.
+
+| Score | Action |
+|-------|--------|
+| **80-100** | Auto-scaffold specialist + priority review |
+| **60-79** | Queue for manual evaluation |
+| **40-59** | Watch list -- monitor for momentum |
+| **< 40** | Skip |
 
 ---
 
 ## Multi-Format Output
 
-Every specialist produces all 5 formats simultaneously. Consume them however fits your stack:
+Every specialist generates all 5 formats via `scripts/generate_outputs.py`:
 
-**Python API** -- import directly:
+**Python API** -- import and call directly:
 ```python
-from oss_agent_lab.specialists import autoresearch
+from agents.specialists.autoresearch.agent import AutoresearchSpecialist
+from oss_agent_lab.contracts import Intent, Query, SpecialistRequest
 
-result = autoresearch.run("What are the latest advances in test-time compute?")
+specialist = AutoresearchSpecialist()
+request = SpecialistRequest(
+    intent=Intent(action="research", domain="ai", confidence=0.9, parameters={}),
+    query=Query(user_input="Latest advances in test-time compute"),
+    specialist_name="autoresearch",
+)
+response = await specialist.execute(request)
+print(response.result)
 ```
 
 **CLI Tool** -- pipe into scripts:
 ```bash
-oss-agent-lab run autoresearch "latest advances in test-time compute"
+oss-lab run autoresearch "Latest advances in test-time compute"
 ```
 
 **MCP Server** -- connect from any MCP client:
@@ -159,10 +190,7 @@ oss-agent-lab run autoresearch "latest advances in test-time compute"
 from crewai import Agent
 from oss_agent_lab.skills import autoresearch_skill
 
-researcher = Agent(
-    role="Research Analyst",
-    tools=[autoresearch_skill],
-)
+researcher = Agent(role="Research Analyst", tools=[autoresearch_skill])
 ```
 
 **REST API** -- call from any language:
@@ -177,34 +205,29 @@ curl -X POST http://localhost:8080/api/v1/run \
 ## Quickstart
 
 ```bash
+# Clone and install
 git clone https://github.com/jeremylongshore/oss-agent-lab.git
 cd oss-agent-lab
-pip install -e .
-python -m oss_agent_lab "Should I invest in this AI startup?"
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+
+# Run all tests (120+ tests across 10 specialists)
+pytest tests/
+
+# Score a GitHub repo
+python -c "
+import asyncio
+from scoring.scorer import score_repo
+score = asyncio.run(score_repo('karpathy/autoresearch'))
+print(f'{score.repo}: {score.total}/100 -> {score.action}')
+"
+
+# Generate outputs for a specialist
+python scripts/generate_outputs.py agents/specialists/autoresearch/
+
+# Scaffold a new specialist from a repo
+python scripts/generate_specialist.py owner/repo --name my_specialist
 ```
-
-The Conductor decomposes the query, the Router dispatches to `stock-analyst`, `autoresearch`, and `opinion-analyst` in parallel, and the Aggregator returns a unified, cited response.
-
----
-
-## Capability Scoring
-
-Every repo in the index gets a **Capability Score** from 0 to 100, computed as:
-
-| Signal Group | Weight | Sources |
-|-------------|--------|---------|
-| **Discovery** | 40% | GitHub stars velocity, HN points, Reddit upvotes, social mentions |
-| **Quality** | 35% | Documentation coverage, test presence, CI status, issue response time |
-| **Durability** | 25% | Commit frequency, contributor count, license compatibility, dependency health |
-
-Score thresholds drive automation:
-
-| Score | Action |
-|-------|--------|
-| **80+** | Auto-scaffold a new specialist |
-| **60-79** | Flag for manual evaluation |
-| **40-59** | Add to watch list |
-| **<40** | Skip |
 
 ---
 
@@ -213,20 +236,59 @@ Score thresholds drive automation:
 ```
 YOUR FRAMEWORK  (CrewAI / LangChain / Claude SDK / AutoGen)
         |
-        | consumes
+        | consumes capabilities via
         v
 MCP SERVERS / AGENT SKILLS  (protocol layer)
         |
         | generated by
         v
-OSS AGENT LAB  (the missing layer -- we build this)
+OSS AGENT LAB  (the missing auto-wrapping layer)
         |
-        | watches
+        | watches + scores
         v
-GITHUB TRENDING + OSS ECOSYSTEM
+GITHUB TRENDING + 6 MORE SOURCES  (raw frontier signal)
 ```
 
 Frameworks orchestrate. Protocols standardize. **OSS Agent Lab feeds them both.**
+
+---
+
+## Project Structure
+
+```
+oss-agent-lab/
+├── src/oss_agent_lab/          # Core library (contracts, base classes)
+│   ├── contracts.py            # Pydantic v2 schemas (Query, Intent, Request, Response)
+│   └── base.py                 # BaseSpecialist ABC, OutputFormat, Tool
+├── agents/
+│   ├── conductor/agent.py      # Tier 1: NL → intent classification
+│   ├── router/                 # Tier 2: dispatch + aggregation
+│   │   ├── agent.py            # RouterAgent
+│   │   └── registry.py         # SKILL.md auto-discovery
+│   ├── memory/session.py       # Session memory with persistence
+│   └── specialists/            # Tier 3: 10 plug-and-play specialists
+│       ├── _template/          # Copy this to create a new specialist
+│       ├── autoresearch/
+│       ├── swarm_predict/
+│       ├── deer_flow/
+│       ├── browser_ai/
+│       ├── knowledge_graph/
+│       ├── stock_analyst/
+│       ├── opinion_analyst/
+│       ├── gui_agent/
+│       ├── sandbox/
+│       └── repo_scanner/       # Meta-specialist: auto-scaffolds new specialists
+├── scoring/                    # Capability Scoring Engine
+│   ├── scorer.py               # Weighted composite scorer (15 signals)
+│   ├── index.py                # Temporal index with trend detection
+│   ├── thresholds.py           # Score → action mapping
+│   └── sources/                # 7 source scrapers
+├── scripts/
+│   ├── generate_outputs.py     # Multi-format wrapper generator
+│   └── generate_specialist.py  # Auto-scaffold from template
+├── tests/                      # 120+ tests, 85%+ coverage
+└── 000-docs/                   # Project documentation (NNN-CC-ABCD filing)
+```
 
 ---
 
@@ -235,18 +297,23 @@ Frameworks orchestrate. Protocols standardize. **OSS Agent Lab feeds them both.*
 New specialists are the primary contribution path. Each specialist is a single PR.
 
 1. Copy `agents/specialists/_template/` to `agents/specialists/your_specialist/`
-2. Implement the four required files:
-   - `agent.py` -- core logic wrapping the upstream repo
-   - `tools.py` -- tool definitions for framework integration
-   - `SKILL.md` -- structured skill manifest
-   - `README.md` -- specialist-level documentation
-3. Add tests in `tests/specialists/your_specialist/`
+2. Implement four files: `agent.py`, `tools.py`, `SKILL.md`, `__init__.py`
+3. Add tests in `tests/test_your_specialist.py`
 4. Meet the bar:
+   - `BaseSpecialist` contract with `execute()` returning `SpecialistResponse`
+   - SKILL.md with required YAML frontmatter (name, version, capabilities, etc.)
    - 80%+ test coverage
-   - All 5 output formats generated
-   - Pydantic schemas from `agents/contracts/schemas.py`
-   - MIT-compatible license on the upstream repo
-5. Open a PR. The CI pipeline validates coverage, linting, and format generation.
+   - ruff + mypy clean
+5. Open a PR -- CI validates linting, types, tests, coverage, and SKILL.md schema.
+
+**Specialist tiers:**
+
+| Tier | Criteria |
+|------|----------|
+| **Core** | Ships with v1, maintained by project owner |
+| **Verified** | PR reviewed + 80%+ tests + 30 days active maintenance |
+| **Community** | PR merged, self-maintained by contributor |
+| **Experimental** | In progress, not production-ready |
 
 ---
 

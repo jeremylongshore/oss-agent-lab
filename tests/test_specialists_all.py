@@ -283,7 +283,7 @@ class TestSandbox:
 
 
 class TestAllSpecialistConsistency:
-    """Verify all 9 specialists follow the same contract."""
+    """Verify all 10 specialists follow the same contract."""
 
     SPECIALIST_CLASSES: ClassVar[list[tuple[str, str]]] = [
         ("agents.specialists.autoresearch.agent", "AutoresearchSpecialist"),
@@ -295,6 +295,7 @@ class TestAllSpecialistConsistency:
         ("agents.specialists.opinion_analyst.agent", "OpinionAnalystSpecialist"),
         ("agents.specialists.gui_agent.agent", "GuiAgentSpecialist"),
         ("agents.specialists.sandbox.agent", "SandboxSpecialist"),
+        ("agents.specialists.repo_scanner.agent", "RepoScannerSpecialist"),
     ]
 
     def _import_specialist(self, module_path: str, class_name: str) -> object:
@@ -336,6 +337,7 @@ class TestAllSpecialistConsistency:
             ("opinion_analyst", "Check sentiment"),
             ("gui_agent", "Click login button"),
             ("sandbox", "Run hello world"),
+            ("repo_scanner", "test/trending-repo"),
         ]
         for (mod_path, cls_name), (name, query) in zip(
             self.SPECIALIST_CLASSES, test_cases, strict=True,
