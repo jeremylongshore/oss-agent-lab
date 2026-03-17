@@ -3,28 +3,9 @@
 from __future__ import annotations
 
 import pytest
+from helpers import make_request
 
-from oss_agent_lab.contracts import Intent, Query, SpecialistRequest, SpecialistResponse
-
-
-def _make_request(
-    specialist_name: str,
-    user_input: str,
-    action: str = "research",
-    domain: str = "ai",
-    **params: object,
-) -> SpecialistRequest:
-    return SpecialistRequest(
-        intent=Intent(
-            action=action,
-            domain=domain,
-            confidence=0.9,
-            parameters=dict(params),
-        ),
-        query=Query(user_input=user_input),
-        specialist_name=specialist_name,
-    )
-
+from oss_agent_lab.contracts import SpecialistResponse
 
 # ---------------------------------------------------------------------------
 # Autoresearch
@@ -37,7 +18,7 @@ class TestAutoresearchSpecialist:
         from agents.specialists.autoresearch.agent import AutoresearchSpecialist
 
         s = AutoresearchSpecialist()
-        req = _make_request("autoresearch", "Research transformers", topic="transformers")
+        req = make_request("autoresearch", "Research transformers", topic="transformers")
         resp = await s.execute(req)
 
         assert isinstance(resp, SpecialistResponse)
@@ -53,6 +34,7 @@ class TestAutoresearchSpecialist:
         assert s.source_repo == "karpathy/autoresearch"
         assert "research" in s.capabilities
         assert len(s.tools) >= 3
+        assert any(t.name == "generate_hypothesis" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.autoresearch.tools import (
@@ -62,14 +44,16 @@ class TestAutoresearchSpecialist:
         )
 
         hyp = generate_hypothesis("AI safety")
-        assert isinstance(hyp, dict)
+        assert "hypotheses" in hyp
+        assert "topic" in hyp
 
         exp = run_experiment("AI models are safe")
-        assert isinstance(exp, dict)
-        assert "experiment_id" in exp or "findings" in exp or "status" in exp
+        assert "experiment_id" in exp
+        assert "findings" in exp
 
         analysis = analyze_results([{"finding": "test", "strength": 0.8}])
-        assert isinstance(analysis, dict)
+        assert "summary" in analysis
+        assert "confidence_score" in analysis
 
 
 # ---------------------------------------------------------------------------
@@ -83,7 +67,7 @@ class TestSwarmPredictSpecialist:
         from agents.specialists.swarm_predict.agent import SwarmPredictSpecialist
 
         s = SwarmPredictSpecialist()
-        req = _make_request(
+        req = make_request(
             "swarm_predict",
             "Predict S&P 500 next week",
             action="predict",
@@ -104,6 +88,7 @@ class TestSwarmPredictSpecialist:
         assert s.source_repo == "666ghj/MiroFish"
         assert "predict" in s.capabilities or "consensus" in s.capabilities
         assert len(s.tools) >= 3
+        assert any(t.name == "create_prediction_swarm" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.swarm_predict.tools import (
@@ -113,14 +98,17 @@ class TestSwarmPredictSpecialist:
         )
 
         swarm = create_prediction_swarm("test target")
-        assert isinstance(swarm, dict)
+        assert "swarm_id" in swarm
+        assert "models" in swarm
 
         preds = [{"value": 42.0, "confidence": 0.8, "model": "m1"}]
         agg = aggregate_predictions(preds)
-        assert isinstance(agg, dict)
+        assert "consensus_value" in agg
+        assert "agreement_ratio" in agg
 
         result = evaluate_consensus(agg)
-        assert isinstance(result, dict)
+        assert "consensus_reached" in result
+        assert "confidence" in result
 
 
 # ---------------------------------------------------------------------------
@@ -134,7 +122,7 @@ class TestDeerFlowSpecialist:
         from agents.specialists.deer_flow.agent import DeerFlowSpecialist
 
         s = DeerFlowSpecialist()
-        req = _make_request(
+        req = make_request(
             "deer_flow",
             "Build a web scraper",
             action="code_generation",
@@ -154,6 +142,7 @@ class TestDeerFlowSpecialist:
         assert s.source_repo == "bytedance/deer-flow"
         assert "code_generation" in s.capabilities or "research" in s.capabilities
         assert len(s.tools) >= 3
+        assert any(t.name == "research_topic" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.deer_flow.tools import (
@@ -163,13 +152,16 @@ class TestDeerFlowSpecialist:
         )
 
         research = research_topic("web scraping")
-        assert isinstance(research, dict)
+        assert "findings" in research
+        assert "summary" in research
 
         code = generate_code("A function that adds two numbers")
-        assert isinstance(code, dict)
+        assert "code" in code
+        assert "language" in code
 
         artifact = create_artifact({"content": "test report"})
-        assert isinstance(artifact, dict)
+        assert "artifact_id" in artifact
+        assert "format" in artifact
 
 
 # ---------------------------------------------------------------------------
@@ -177,27 +169,44 @@ class TestDeerFlowSpecialist:
 # ---------------------------------------------------------------------------
 
 
+_V1_SPECIALISTS = [
+    (
+        "agents.specialists.autoresearch.agent",
+        "AutoresearchSpecialist",
+        "autoresearch",
+        "Research AI",
+    ),
+    (
+        "agents.specialists.swarm_predict.agent",
+        "SwarmPredictSpecialist",
+        "swarm_predict",
+        "Predict trends",
+    ),
+    ("agents.specialists.deer_flow.agent", "DeerFlowSpecialist", "deer_flow", "Generate code"),
+]
+
+
 class TestSpecialistConsistency:
     """All specialists must follow the same contract."""
 
+    @pytest.mark.parametrize(
+        "mod_path,cls_name,name,query_text",
+        _V1_SPECIALISTS,
+        ids=[t[2] for t in _V1_SPECIALISTS],
+    )
     @pytest.mark.asyncio
-    async def test_all_return_specialist_response(self) -> None:
-        from agents.specialists.autoresearch.agent import AutoresearchSpecialist
-        from agents.specialists.deer_flow.agent import DeerFlowSpecialist
-        from agents.specialists.swarm_predict.agent import SwarmPredictSpecialist
+    async def test_returns_specialist_response(
+        self, mod_path: str, cls_name: str, name: str, query_text: str
+    ) -> None:
+        import importlib
 
-        specialists = [
-            (AutoresearchSpecialist(), "autoresearch", "Research AI"),
-            (SwarmPredictSpecialist(), "swarm_predict", "Predict trends"),
-            (DeerFlowSpecialist(), "deer_flow", "Generate code"),
-        ]
-
-        for specialist, name, query_text in specialists:
-            req = _make_request(name, query_text)
-            resp = await specialist.execute(req)
-            assert isinstance(resp, SpecialistResponse), f"{name} didn't return SpecialistResponse"
-            assert resp.specialist_name == name, f"{name} wrong specialist_name"
-            assert resp.status == "success", f"{name} status != success"
+        mod = importlib.import_module(mod_path)
+        specialist = getattr(mod, cls_name)()
+        req = make_request(name, query_text)
+        resp = await specialist.execute(req)
+        assert isinstance(resp, SpecialistResponse), f"{name} didn't return SpecialistResponse"
+        assert resp.specialist_name == name
+        assert resp.status == "success"
 
     def test_all_have_skill_metadata(self) -> None:
         from agents.specialists.autoresearch.agent import AutoresearchSpecialist

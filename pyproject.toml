@@ -52,3 +52,5 @@ python_version = "3.11"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+addopts = "--strict-markers"
+markers = ["asyncio: async test"]

@@ -17,89 +17,38 @@ from scoring.thresholds import (
 
 
 class TestCapabilityScore:
-    def test_auto_scaffold(self) -> None:
+    @pytest.mark.parametrize(
+        "total,expected_action",
+        [
+            (85.0, "auto_scaffold"),
+            (70.0, "evaluate"),
+            (50.0, "watch"),
+            (30.0, "skip"),
+            (80.0, "auto_scaffold"),  # boundary
+            (60.0, "evaluate"),  # boundary
+            (40.0, "watch"),  # boundary
+        ],
+        ids=[
+            "auto_scaffold-85",
+            "evaluate-70",
+            "watch-50",
+            "skip-30",
+            "boundary-80",
+            "boundary-60",
+            "boundary-40",
+        ],
+    )
+    def test_score_action(self, total: float, expected_action: str) -> None:
         score = CapabilityScore(
             repo="test/repo",
-            total=85.0,
-            discovery=34.0,
-            quality=30.0,
-            durability=21.0,
+            total=total,
+            discovery=total * 0.4,
+            quality=total * 0.35,
+            durability=total * 0.25,
             timestamp="2026-03-16",
             sources={},
         )
-        assert score.action == "auto_scaffold"
-
-    def test_evaluate(self) -> None:
-        score = CapabilityScore(
-            repo="test/repo",
-            total=70.0,
-            discovery=28.0,
-            quality=24.5,
-            durability=17.5,
-            timestamp="2026-03-16",
-            sources={},
-        )
-        assert score.action == "evaluate"
-
-    def test_watch(self) -> None:
-        score = CapabilityScore(
-            repo="test/repo",
-            total=50.0,
-            discovery=20.0,
-            quality=17.5,
-            durability=12.5,
-            timestamp="2026-03-16",
-            sources={},
-        )
-        assert score.action == "watch"
-
-    def test_skip(self) -> None:
-        score = CapabilityScore(
-            repo="test/repo",
-            total=30.0,
-            discovery=12.0,
-            quality=10.5,
-            durability=7.5,
-            timestamp="2026-03-16",
-            sources={},
-        )
-        assert score.action == "skip"
-
-    def test_boundary_80(self) -> None:
-        score = CapabilityScore(
-            repo="x/y",
-            total=80.0,
-            discovery=32.0,
-            quality=28.0,
-            durability=20.0,
-            timestamp="2026-03-16",
-            sources={},
-        )
-        assert score.action == "auto_scaffold"
-
-    def test_boundary_60(self) -> None:
-        score = CapabilityScore(
-            repo="x/y",
-            total=60.0,
-            discovery=24.0,
-            quality=21.0,
-            durability=15.0,
-            timestamp="2026-03-16",
-            sources={},
-        )
-        assert score.action == "evaluate"
-
-    def test_boundary_40(self) -> None:
-        score = CapabilityScore(
-            repo="x/y",
-            total=40.0,
-            discovery=16.0,
-            quality=14.0,
-            durability=10.0,
-            timestamp="2026-03-16",
-            sources={},
-        )
-        assert score.action == "watch"
+        assert score.action == expected_action
 
 
 class TestThresholds:
@@ -249,7 +198,7 @@ class TestTemporalIndex:
         )
         idx.add_score(s1)  # trend = "new" (first entry)
         idx.add_score(s2)  # trend = "new" (only 1 prior entry)
-        entry3 = idx.add_score(s3)  # now 2 prior entries → can detect trend
+        entry3 = idx.add_score(s3)  # now 2 prior entries -> can detect trend
         assert entry3.trend == "rising"
 
     def test_to_json_and_from_json(self) -> None:

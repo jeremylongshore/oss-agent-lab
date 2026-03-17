@@ -11,11 +11,8 @@ from oss_agent_lab.contracts import Intent, Query, SpecialistRequest, Specialist
 class TestOutputFormat:
     def test_all_formats(self):
         assert len(OutputFormat) == 5
-        assert OutputFormat.PYTHON_API is not None
-        assert OutputFormat.CLI is not None
-        assert OutputFormat.MCP_SERVER is not None
-        assert OutputFormat.AGENT_SKILL is not None
-        assert OutputFormat.REST_API is not None
+        expected = {"PYTHON_API", "CLI", "MCP_SERVER", "AGENT_SKILL", "REST_API"}
+        assert {f.name for f in OutputFormat} == expected
 
 
 class TestTool:
@@ -55,8 +52,8 @@ class TestBaseSpecialist:
 
     def test_supports_format(self):
         s = ConcreteSpecialist()
-        assert s.supports_format(OutputFormat.PYTHON_API) is True
-        assert s.supports_format(OutputFormat.MCP_SERVER) is False
+        assert s.supports_format(OutputFormat.PYTHON_API)
+        assert not s.supports_format(OutputFormat.MCP_SERVER)
 
     def test_get_skill_metadata(self):
         s = ConcreteSpecialist()

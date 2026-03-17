@@ -69,7 +69,7 @@ def tmp_specialists(tmp_path: Path) -> Path:
     return tmp_path
 
 
-class TestParseFromtmatter:
+class TestParseFrontmatter:
     def test_valid_frontmatter(self, tmp_path: Path) -> None:
         skill = tmp_path / "SKILL.md"
         skill.write_text("---\nname: test\ncapabilities:\n  - a\n---\nbody\n")
