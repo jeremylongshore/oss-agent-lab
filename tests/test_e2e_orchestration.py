@@ -54,11 +54,14 @@ def specialist_dir(tmp_path: Path) -> Path:
 def registry_with_mock() -> SpecialistRegistry:
     """Registry with a manually registered mock specialist."""
     registry = SpecialistRegistry(specialists_dir=Path("/nonexistent"))
-    registry.register("mock_researcher", {
-        "name": "mock_researcher",
-        "description": "Mock research specialist",
-        "capabilities": ["research", "ai"],
-    })
+    registry.register(
+        "mock_researcher",
+        {
+            "name": "mock_researcher",
+            "description": "Mock research specialist",
+            "capabilities": ["research", "ai"],
+        },
+    )
     return registry
 
 
@@ -123,12 +126,14 @@ class TestConductorClassifiesIntent:
     @pytest.mark.asyncio
     async def test_process_returns_intent(self, sample_query: Query) -> None:
         """ConductorAgent.process() returns a well-formed Intent (API mocked)."""
-        intent_json = json.dumps({
-            "action": "research",
-            "domain": "ai",
-            "confidence": 0.92,
-            "parameters": {"topic": "transformers"},
-        })
+        intent_json = json.dumps(
+            {
+                "action": "research",
+                "domain": "ai",
+                "confidence": 0.92,
+                "parameters": {"topic": "transformers"},
+            }
+        )
 
         # Build a mock Anthropic response message.
         mock_text_block = MagicMock()
@@ -199,12 +204,14 @@ class TestFullPipelineMock:
         query = Query(user_input="Analyze trending AI repos")
 
         # --- Conductor (mocked) ---
-        intent_json = json.dumps({
-            "action": "research",
-            "domain": "ai",
-            "confidence": 0.88,
-            "parameters": {"topic": "trending AI"},
-        })
+        intent_json = json.dumps(
+            {
+                "action": "research",
+                "domain": "ai",
+                "confidence": 0.88,
+                "parameters": {"topic": "trending AI"},
+            }
+        )
 
         mock_text_block = MagicMock()
         mock_text_block.type = "text"
@@ -361,10 +368,13 @@ class TestRouterHandlesNoMatchingSpecialists:
     async def test_no_match_returns_error_response(self) -> None:
         """When no specialist matches, router returns a graceful error response."""
         registry = SpecialistRegistry(specialists_dir=Path("/nonexistent"))
-        registry.register("weather_bot", {
-            "name": "weather_bot",
-            "capabilities": ["weather", "forecast"],
-        })
+        registry.register(
+            "weather_bot",
+            {
+                "name": "weather_bot",
+                "capabilities": ["weather", "forecast"],
+            },
+        )
 
         router = RouterAgent(registry=registry)
 

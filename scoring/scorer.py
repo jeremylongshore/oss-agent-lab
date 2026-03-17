@@ -9,6 +9,7 @@ Thresholds:
     40-59:  Watch list
     < 40:   Skip
 """
+
 import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -31,38 +32,46 @@ _GITHUB_API = "https://api.github.com"
 _GH_TIMEOUT = 10.0
 
 # Signals that belong to each scoring category (mirrors thresholds.py groupings)
-_DISCOVERY_SIGNALS = frozenset({
-    "github_star_velocity",
-    "github_trending_position",
-    "hn_frontpage_score",
-    "devhunt_upvotes",
-    "rundown_mention",
-})
-_QUALITY_SIGNALS = frozenset({
-    "readme_quality",
-    "test_coverage",
-    "api_surface_clarity",
-    "license_compatibility",
-    "maintenance_activity",
-})
-_DURABILITY_SIGNALS = frozenset({
-    "contributor_diversity",
-    "ossinsight_growth_curve",
-    "trendshift_momentum",
-    "dependency_health",
-    "community_depth",
-})
+_DISCOVERY_SIGNALS = frozenset(
+    {
+        "github_star_velocity",
+        "github_trending_position",
+        "hn_frontpage_score",
+        "devhunt_upvotes",
+        "rundown_mention",
+    }
+)
+_QUALITY_SIGNALS = frozenset(
+    {
+        "readme_quality",
+        "test_coverage",
+        "api_surface_clarity",
+        "license_compatibility",
+        "maintenance_activity",
+    }
+)
+_DURABILITY_SIGNALS = frozenset(
+    {
+        "contributor_diversity",
+        "ossinsight_growth_curve",
+        "trendshift_momentum",
+        "dependency_health",
+        "community_depth",
+    }
+)
 
 # Licences that are fully compatible with typical open-source packaging
-_PERMISSIVE_LICENSES = frozenset({
-    "mit",
-    "apache-2.0",
-    "bsd-2-clause",
-    "bsd-3-clause",
-    "isc",
-    "unlicense",
-    "0bsd",
-})
+_PERMISSIVE_LICENSES = frozenset(
+    {
+        "mit",
+        "apache-2.0",
+        "bsd-2-clause",
+        "bsd-3-clause",
+        "isc",
+        "unlicense",
+        "0bsd",
+    }
+)
 _COPYLEFT_LICENSES = frozenset({"gpl-2.0", "gpl-3.0", "lgpl-2.1", "lgpl-3.0", "agpl-3.0"})
 
 
@@ -144,9 +153,7 @@ async def _fetch_recent_commits(repo: str, since_days: int = 30) -> int:
     """
     import datetime as dt_mod
 
-    cutoff = (
-        dt_mod.datetime.now(dt_mod.UTC) - dt_mod.timedelta(days=since_days)
-    ).isoformat()
+    cutoff = (dt_mod.datetime.now(dt_mod.UTC) - dt_mod.timedelta(days=since_days)).isoformat()
 
     try:
         async with httpx.AsyncClient(timeout=_GH_TIMEOUT) as client:
@@ -168,9 +175,7 @@ async def _fetch_recent_commits(repo: str, since_days: int = 30) -> int:
 # ---------------------------------------------------------------------------
 
 
-async def _compute_quality_signals(
-    repo: str, repo_info: dict[str, Any]
-) -> dict[str, Any]:
+async def _compute_quality_signals(repo: str, repo_info: dict[str, Any]) -> dict[str, Any]:
     """Derive quality signals from GitHub API data.
 
     Signals returned (all floats in [0, 1]):
@@ -207,11 +212,7 @@ async def _compute_quality_signals(
 
     # --- test_coverage: tests/ or test/ directory present ---
     test_dirs = {"tests", "test"}
-    has_tests = bool(
-        test_dirs & {
-            name for name, t in types_by_name.items() if t == "dir"
-        }
-    )
+    has_tests = bool(test_dirs & {name for name, t in types_by_name.items() if t == "dir"})
     test_coverage = 0.5 if has_tests else 0.0
 
     # --- api_surface_clarity: Python files with type hints ---
@@ -438,8 +439,7 @@ async def score_repo(repo: str) -> CapabilityScore:
 
     # Compute weighted total (0-100) and sub-totals
     total = sum(
-        all_signals.get(signal, 0.0) * weight * 100
-        for signal, weight in SIGNAL_WEIGHTS.items()
+        all_signals.get(signal, 0.0) * weight * 100 for signal, weight in SIGNAL_WEIGHTS.items()
     )
     discovery = sum(
         all_signals.get(signal, 0.0) * weight * 100

@@ -50,10 +50,7 @@ def research_topic(
     base_confidence: float = cfg["confidence"]
 
     effective_sources = sources if sources else [f"auto-source-{i}" for i in range(1, 4)]
-    findings = [
-        f"Finding {i + 1} on '{topic}' (depth={depth})"
-        for i in range(finding_count)
-    ]
+    findings = [f"Finding {i + 1} on '{topic}' (depth={depth})" for i in range(finding_count)]
     summary = (
         f"Research on '{topic}' completed at {depth!r} depth. "
         f"{len(findings)} findings identified across {len(effective_sources)} sources."
@@ -164,9 +161,7 @@ def create_artifact(
             f"artifact_type must be one of {sorted(known_types)!r}; got {artifact_type!r}"
         )
     if format not in known_formats:
-        raise ValueError(
-            f"format must be one of {sorted(known_formats)!r}; got {format!r}"
-        )
+        raise ValueError(f"format must be one of {sorted(known_formats)!r}; got {format!r}")
 
     raw = str(sorted(content.items())) + artifact_type + format
     artifact_id = "artifact-" + hashlib.sha1(raw.encode()).hexdigest()[:12]

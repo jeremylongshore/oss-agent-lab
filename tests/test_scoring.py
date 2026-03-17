@@ -19,50 +19,85 @@ from scoring.thresholds import (
 class TestCapabilityScore:
     def test_auto_scaffold(self) -> None:
         score = CapabilityScore(
-            repo="test/repo", total=85.0, discovery=34.0, quality=30.0,
-            durability=21.0, timestamp="2026-03-16", sources={}
+            repo="test/repo",
+            total=85.0,
+            discovery=34.0,
+            quality=30.0,
+            durability=21.0,
+            timestamp="2026-03-16",
+            sources={},
         )
         assert score.action == "auto_scaffold"
 
     def test_evaluate(self) -> None:
         score = CapabilityScore(
-            repo="test/repo", total=70.0, discovery=28.0, quality=24.5,
-            durability=17.5, timestamp="2026-03-16", sources={}
+            repo="test/repo",
+            total=70.0,
+            discovery=28.0,
+            quality=24.5,
+            durability=17.5,
+            timestamp="2026-03-16",
+            sources={},
         )
         assert score.action == "evaluate"
 
     def test_watch(self) -> None:
         score = CapabilityScore(
-            repo="test/repo", total=50.0, discovery=20.0, quality=17.5,
-            durability=12.5, timestamp="2026-03-16", sources={}
+            repo="test/repo",
+            total=50.0,
+            discovery=20.0,
+            quality=17.5,
+            durability=12.5,
+            timestamp="2026-03-16",
+            sources={},
         )
         assert score.action == "watch"
 
     def test_skip(self) -> None:
         score = CapabilityScore(
-            repo="test/repo", total=30.0, discovery=12.0, quality=10.5,
-            durability=7.5, timestamp="2026-03-16", sources={}
+            repo="test/repo",
+            total=30.0,
+            discovery=12.0,
+            quality=10.5,
+            durability=7.5,
+            timestamp="2026-03-16",
+            sources={},
         )
         assert score.action == "skip"
 
     def test_boundary_80(self) -> None:
         score = CapabilityScore(
-            repo="x/y", total=80.0, discovery=32.0, quality=28.0,
-            durability=20.0, timestamp="2026-03-16", sources={}
+            repo="x/y",
+            total=80.0,
+            discovery=32.0,
+            quality=28.0,
+            durability=20.0,
+            timestamp="2026-03-16",
+            sources={},
         )
         assert score.action == "auto_scaffold"
 
     def test_boundary_60(self) -> None:
         score = CapabilityScore(
-            repo="x/y", total=60.0, discovery=24.0, quality=21.0,
-            durability=15.0, timestamp="2026-03-16", sources={}
+            repo="x/y",
+            total=60.0,
+            discovery=24.0,
+            quality=21.0,
+            durability=15.0,
+            timestamp="2026-03-16",
+            sources={},
         )
         assert score.action == "evaluate"
 
     def test_boundary_40(self) -> None:
         score = CapabilityScore(
-            repo="x/y", total=40.0, discovery=16.0, quality=14.0,
-            durability=10.0, timestamp="2026-03-16", sources={}
+            repo="x/y",
+            total=40.0,
+            discovery=16.0,
+            quality=14.0,
+            durability=10.0,
+            timestamp="2026-03-16",
+            sources={},
         )
         assert score.action == "watch"
 
@@ -81,24 +116,33 @@ class TestThresholds:
 
     def test_discovery_signals(self) -> None:
         discovery_keys = [
-            "github_star_velocity", "github_trending_position",
-            "hn_frontpage_score", "devhunt_upvotes", "rundown_mention",
+            "github_star_velocity",
+            "github_trending_position",
+            "hn_frontpage_score",
+            "devhunt_upvotes",
+            "rundown_mention",
         ]
         for key in discovery_keys:
             assert key in SIGNAL_WEIGHTS
 
     def test_quality_signals(self) -> None:
         quality_keys = [
-            "readme_quality", "test_coverage", "api_surface_clarity",
-            "license_compatibility", "maintenance_activity",
+            "readme_quality",
+            "test_coverage",
+            "api_surface_clarity",
+            "license_compatibility",
+            "maintenance_activity",
         ]
         for key in quality_keys:
             assert key in SIGNAL_WEIGHTS
 
     def test_durability_signals(self) -> None:
         durability_keys = [
-            "contributor_diversity", "ossinsight_growth_curve",
-            "trendshift_momentum", "dependency_health", "community_depth",
+            "contributor_diversity",
+            "ossinsight_growth_curve",
+            "trendshift_momentum",
+            "dependency_health",
+            "community_depth",
         ]
         for key in durability_keys:
             assert key in SIGNAL_WEIGHTS
@@ -160,8 +204,13 @@ class TestTemporalIndex:
     def test_add_score(self) -> None:
         idx = TemporalIndex()
         score = CapabilityScore(
-            repo="x/y", total=85.0, discovery=34.0, quality=30.0,
-            durability=21.0, timestamp="2026-03-16", sources={}
+            repo="x/y",
+            total=85.0,
+            discovery=34.0,
+            quality=30.0,
+            durability=21.0,
+            timestamp="2026-03-16",
+            sources={},
         )
         entry = idx.add_score(score)
         assert entry.repo == "x/y"
@@ -172,16 +221,31 @@ class TestTemporalIndex:
     def test_add_score_detects_rising(self) -> None:
         idx = TemporalIndex()
         s1 = CapabilityScore(
-            repo="x/y", total=60.0, discovery=24.0, quality=21.0,
-            durability=15.0, timestamp="t1", sources={}
+            repo="x/y",
+            total=60.0,
+            discovery=24.0,
+            quality=21.0,
+            durability=15.0,
+            timestamp="t1",
+            sources={},
         )
         s2 = CapabilityScore(
-            repo="x/y", total=75.0, discovery=30.0, quality=26.0,
-            durability=19.0, timestamp="t2", sources={}
+            repo="x/y",
+            total=75.0,
+            discovery=30.0,
+            quality=26.0,
+            durability=19.0,
+            timestamp="t2",
+            sources={},
         )
         s3 = CapabilityScore(
-            repo="x/y", total=85.0, discovery=34.0, quality=30.0,
-            durability=21.0, timestamp="t3", sources={}
+            repo="x/y",
+            total=85.0,
+            discovery=34.0,
+            quality=30.0,
+            durability=21.0,
+            timestamp="t3",
+            sources={},
         )
         idx.add_score(s1)  # trend = "new" (first entry)
         idx.add_score(s2)  # trend = "new" (only 1 prior entry)

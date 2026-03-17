@@ -73,10 +73,7 @@ async def fetch_signals(repo: str) -> dict[str, Any]:
 
         # Extract a raw score — field names vary by API version
         raw_score = (
-            match.get("momentum_score")
-            or match.get("momentumScore")
-            or match.get("score")
-            or 0.0
+            match.get("momentum_score") or match.get("momentumScore") or match.get("score") or 0.0
         )
         normalized = max(0.0, min(1.0, float(raw_score)))
     except Exception:

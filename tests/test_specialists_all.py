@@ -40,8 +40,11 @@ class TestBrowserAi:
 
         s = BrowserAiSpecialist()
         req = _make_request(
-            "browser_ai", "Scrape example.com",
-            action="browse", domain="web", url="https://example.com",
+            "browser_ai",
+            "Scrape example.com",
+            action="browse",
+            domain="web",
+            url="https://example.com",
         )
         resp = await s.execute(req)
         assert resp.status == "success"
@@ -79,8 +82,10 @@ class TestKnowledgeGraph:
 
         s = KnowledgeGraphSpecialist()
         req = _make_request(
-            "knowledge_graph", "Build graph of repo dependencies",
-            action="knowledge_graph", domain="code",
+            "knowledge_graph",
+            "Build graph of repo dependencies",
+            action="knowledge_graph",
+            domain="code",
         )
         resp = await s.execute(req)
         assert resp.status == "success"
@@ -118,8 +123,11 @@ class TestStockAnalyst:
 
         s = StockAnalystSpecialist()
         req = _make_request(
-            "stock_analyst", "Analyze AAPL",
-            action="analyze", domain="finance", ticker="AAPL",
+            "stock_analyst",
+            "Analyze AAPL",
+            action="analyze",
+            domain="finance",
+            ticker="AAPL",
         )
         resp = await s.execute(req)
         assert resp.status == "success"
@@ -157,8 +165,10 @@ class TestOpinionAnalyst:
 
         s = OpinionAnalystSpecialist()
         req = _make_request(
-            "opinion_analyst", "Analyze sentiment of this review",
-            action="sentiment", domain="general",
+            "opinion_analyst",
+            "Analyze sentiment of this review",
+            action="sentiment",
+            domain="general",
         )
         resp = await s.execute(req)
         assert resp.status == "success"
@@ -202,8 +212,10 @@ class TestGuiAgent:
 
         s = GuiAgentSpecialist()
         req = _make_request(
-            "gui_agent", "Click the login button",
-            action="gui_automation", domain="web",
+            "gui_agent",
+            "Click the login button",
+            action="gui_automation",
+            domain="web",
         )
         resp = await s.execute(req)
         assert resp.status == "success"
@@ -245,8 +257,10 @@ class TestSandbox:
 
         s = SandboxSpecialist()
         req = _make_request(
-            "sandbox", "Run print('hello')",
-            action="execute", domain="code",
+            "sandbox",
+            "Run print('hello')",
+            action="execute",
+            domain="code",
         )
         resp = await s.execute(req)
         assert resp.status == "success"
@@ -283,7 +297,7 @@ class TestSandbox:
 
 
 class TestAllSpecialistConsistency:
-    """Verify all 9 specialists follow the same contract."""
+    """Verify all 10 specialists follow the same contract."""
 
     SPECIALIST_CLASSES: ClassVar[list[tuple[str, str]]] = [
         ("agents.specialists.autoresearch.agent", "AutoresearchSpecialist"),
@@ -295,10 +309,12 @@ class TestAllSpecialistConsistency:
         ("agents.specialists.opinion_analyst.agent", "OpinionAnalystSpecialist"),
         ("agents.specialists.gui_agent.agent", "GuiAgentSpecialist"),
         ("agents.specialists.sandbox.agent", "SandboxSpecialist"),
+        ("agents.specialists.repo_scanner.agent", "RepoScannerSpecialist"),
     ]
 
     def _import_specialist(self, module_path: str, class_name: str) -> object:
         import importlib
+
         mod = importlib.import_module(module_path)
         return getattr(mod, class_name)()
 
@@ -336,9 +352,12 @@ class TestAllSpecialistConsistency:
             ("opinion_analyst", "Check sentiment"),
             ("gui_agent", "Click login button"),
             ("sandbox", "Run hello world"),
+            ("repo_scanner", "test/trending-repo"),
         ]
         for (mod_path, cls_name), (name, query) in zip(
-            self.SPECIALIST_CLASSES, test_cases, strict=True,
+            self.SPECIALIST_CLASSES,
+            test_cases,
+            strict=True,
         ):
             s = self._import_specialist(mod_path, cls_name)
             req = _make_request(name, query)

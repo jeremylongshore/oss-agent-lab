@@ -1,4 +1,5 @@
 """Tests for BaseSpecialist, Tool, and OutputFormat."""
+
 from typing import ClassVar
 
 import pytest
@@ -30,6 +31,7 @@ class TestTool:
 
 class ConcreteSpecialist(BaseSpecialist):
     """Test specialist implementation."""
+
     name = "test"
     description = "Test specialist"
     source_repo = "test/repo"

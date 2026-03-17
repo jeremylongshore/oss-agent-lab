@@ -8,6 +8,7 @@ Usage:
     python scripts/sync_github_projects.py --dry-run   # preview
     python scripts/sync_github_projects.py              # sync all
 """
+
 import argparse
 import json
 from pathlib import Path

@@ -1,4 +1,5 @@
 """Tests for inter-agent contract schemas."""
+
 from oss_agent_lab.contracts import (
     Intent,
     Query,

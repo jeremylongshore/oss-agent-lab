@@ -9,6 +9,7 @@ Usage:
     5. Update SKILL.md with capabilities and allowed-tools
     6. Add tests in tests/test_your_specialist_name.py
 """
+
 from typing import ClassVar
 
 from oss_agent_lab import BaseSpecialist, OutputFormat, Tool

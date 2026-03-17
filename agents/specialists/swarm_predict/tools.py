@@ -125,9 +125,7 @@ def aggregate_predictions(
             confidences.append(conf)
 
     if numeric_values:
-        consensus_value, agreement_ratio = _aggregate_numeric(
-            numeric_values, confidences, method
-        )
+        consensus_value, agreement_ratio = _aggregate_numeric(numeric_values, confidences, method)
     else:
         # Categorical / string voting.
         raw_values = [str(p.get("value", "")) for p in predictions]

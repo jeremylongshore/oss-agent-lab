@@ -128,9 +128,7 @@ class DeerFlowSpecialist(BaseSpecialist):
         )
         code_result: dict[str, Any] | None = None
         if needs_code:
-            specification: str = str(
-                params.get("specification", research_result["summary"])
-            )
+            specification: str = str(params.get("specification", research_result["summary"]))
             language: str = str(params.get("language", "python"))
             style: str = str(params.get("style", "clean"))
             code_result = generate_code(

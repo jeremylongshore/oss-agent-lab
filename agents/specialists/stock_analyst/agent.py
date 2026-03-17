@@ -230,14 +230,12 @@ def _build_summary(
     key_signals: list[str] = [
         f"Fundamental: {fundamental.get('recommendation', 'hold')} "
         f"(P/E {fundamental.get('pe_ratio', 'N/A')})",
-        f"Sentiment: {sentiment.get('overall_sentiment', 'neutral')} "
-        f"(score {raw_sentiment:+.3f})",
+        f"Sentiment: {sentiment.get('overall_sentiment', 'neutral')} (score {raw_sentiment:+.3f})",
     ]
     key_signals.extend(signals[:3])
 
     risk_note = (
-        "Simulated outputs — not financial advice. "
-        "Verify with live market data before acting."
+        "Simulated outputs — not financial advice. Verify with live market data before acting."
     )
 
     return {

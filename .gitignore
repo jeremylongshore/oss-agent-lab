@@ -36,9 +36,8 @@ coverage.xml
 .DS_Store
 Thumbs.db
 
-# Project specific
-output/mcp/*.json
-output/skills/*.json
+# Project specific — generated output files
+output/
 .beads/
 
 # Dolt database files (added by bd init)

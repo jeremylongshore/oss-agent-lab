@@ -6,6 +6,7 @@ Tracks score evolution over time to detect:
 - Peaked repos (score plateauing)
 - Declining repos (score dropping)
 """
+
 import json
 from dataclasses import asdict, dataclass, field
 from typing import Any
@@ -156,8 +157,4 @@ class TemporalIndex:
             List of matching ``IndexEntry`` objects in insertion order.
         """
         actionable_trends = {"rising", "new"}
-        return [
-            e
-            for e in self.entries
-            if e.score >= min_score and e.trend in actionable_trends
-        ]
+        return [e for e in self.entries if e.score >= min_score and e.trend in actionable_trends]
