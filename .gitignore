@@ -40,3 +40,7 @@ Thumbs.db
 output/mcp/*.json
 output/skills/*.json
 .beads/
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
