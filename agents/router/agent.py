@@ -4,7 +4,7 @@ Router Agent — Tier 2: Capability matching, parallel dispatch, and aggregation
 Receives intents from Conductor, queries the Registry for matching specialists,
 dispatches requests in parallel, and aggregates results.
 """
-from oss_agent_lab.contracts import Intent, SpecialistRequest, SpecialistResponse
+from oss_agent_lab.contracts import Intent, SpecialistResponse
 
 
 class RouterAgent:

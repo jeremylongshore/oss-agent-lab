@@ -1,6 +1,6 @@
 """Pydantic models for inter-agent communication in OSS Agent Lab."""
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -9,8 +9,8 @@ class Query(BaseModel):
     """A user query entering the agent pipeline."""
 
     user_input: str
-    session_id: Optional[str] = None
-    context: Optional[dict] = None
+    session_id: str | None = None
+    context: dict | None = None
 
 
 class Intent(BaseModel):
@@ -28,7 +28,7 @@ class SpecialistRequest(BaseModel):
     intent: Intent
     query: Query
     specialist_name: str
-    tools_requested: Optional[list[str]] = None
+    tools_requested: list[str] | None = None
 
 
 class SpecialistResponse(BaseModel):
@@ -37,8 +37,8 @@ class SpecialistResponse(BaseModel):
     specialist_name: str
     status: Literal["success", "error", "partial"]
     result: Any
-    metadata: Optional[dict] = None
-    duration_ms: Optional[float] = None
+    metadata: dict | None = None
+    duration_ms: float | None = None
 
 
 class SessionContext(BaseModel):
@@ -46,4 +46,4 @@ class SessionContext(BaseModel):
 
     session_id: str
     history: list[dict] = Field(default_factory=list)
-    memory: Optional[dict] = None
+    memory: dict | None = None

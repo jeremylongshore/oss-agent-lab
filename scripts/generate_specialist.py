@@ -10,7 +10,6 @@ import argparse
 import shutil
 from pathlib import Path
 
-
 TEMPLATE_DIR = Path(__file__).parent.parent / "agents" / "specialists" / "_template"
 SPECIALISTS_DIR = Path(__file__).parent.parent / "agents" / "specialists"
 
@@ -32,7 +31,7 @@ def scaffold_specialist(repo: str, name: str) -> Path:
     shutil.copytree(TEMPLATE_DIR, target)
     print(f"Scaffolded {name} from template at {target}")
     print(f"Source repo: {repo}")
-    print(f"Next steps:")
+    print("Next steps:")
     print(f"  1. Edit {target}/agent.py — implement specialist class")
     print(f"  2. Edit {target}/tools.py — implement tools")
     print(f"  3. Edit {target}/SKILL.md — update metadata")

@@ -16,7 +16,7 @@ def main():
 @click.argument("query")
 def run(query: str):
     """Run a natural language query through the agent pipeline."""
-    console.print(f"[bold]OSS Agent Lab[/bold] v0.1.0")
+    console.print("[bold]OSS Agent Lab[/bold] v0.1.0")
     console.print(f"Query: {query}")
     console.print("[yellow]Conductor → Router → Specialist pipeline not yet implemented.[/yellow]")
     console.print("See: agents/conductor/agent.py (Epic 2)")

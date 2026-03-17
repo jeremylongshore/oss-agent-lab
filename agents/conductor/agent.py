@@ -4,7 +4,7 @@ Conductor Agent — Tier 1: Natural language interface and task decomposition.
 Accepts natural language queries, classifies intent, and routes to the Router.
 Uses Claude SDK for intent classification.
 """
-from oss_agent_lab.contracts import Query, Intent
+from oss_agent_lab.contracts import Intent, Query
 
 
 class ConductorAgent:

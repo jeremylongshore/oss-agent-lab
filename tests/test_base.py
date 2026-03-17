@@ -1,7 +1,10 @@
 """Tests for BaseSpecialist, Tool, and OutputFormat."""
+from typing import ClassVar
+
 import pytest
-from oss_agent_lab.base import BaseSpecialist, Tool, OutputFormat
-from oss_agent_lab.contracts import SpecialistRequest, SpecialistResponse, Intent, Query
+
+from oss_agent_lab.base import BaseSpecialist, OutputFormat, Tool
+from oss_agent_lab.contracts import Intent, Query, SpecialistRequest, SpecialistResponse
 
 
 class TestOutputFormat:
@@ -30,9 +33,9 @@ class ConcreteSpecialist(BaseSpecialist):
     name = "test"
     description = "Test specialist"
     source_repo = "test/repo"
-    capabilities = ["test_cap"]
-    output_formats = [OutputFormat.PYTHON_API]
-    tools = [Tool(name="test_tool", description="A test tool")]
+    capabilities: ClassVar[list[str]] = ["test_cap"]
+    output_formats: ClassVar[list[OutputFormat]] = [OutputFormat.PYTHON_API]
+    tools: ClassVar[list[Tool]] = [Tool(name="test_tool", description="A test tool")]
 
     async def execute(self, request: SpecialistRequest) -> SpecialistResponse:
         return SpecialistResponse(

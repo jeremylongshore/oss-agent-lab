@@ -1,11 +1,10 @@
 """Tests for scoring engine components."""
-import pytest
 from scoring.scorer import CapabilityScore
 from scoring.thresholds import (
     AUTO_SCAFFOLD_THRESHOLD,
     EVALUATE_THRESHOLD,
-    WATCH_THRESHOLD,
     SIGNAL_WEIGHTS,
+    WATCH_THRESHOLD,
 )
 
 

@@ -1,11 +1,10 @@
 """Tests for inter-agent contract schemas."""
-import pytest
 from oss_agent_lab.contracts import (
-    Query,
     Intent,
+    Query,
+    SessionContext,
     SpecialistRequest,
     SpecialistResponse,
-    SessionContext,
 )
 
 

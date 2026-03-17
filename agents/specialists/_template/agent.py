@@ -9,7 +9,9 @@ Usage:
     5. Update SKILL.md with capabilities and allowed-tools
     6. Add tests in tests/test_your_specialist_name.py
 """
-from oss_agent_lab import BaseSpecialist, Tool, OutputFormat
+from typing import ClassVar
+
+from oss_agent_lab import BaseSpecialist, OutputFormat, Tool
 from oss_agent_lab.contracts import SpecialistRequest, SpecialistResponse
 
 
@@ -19,9 +21,9 @@ class TemplateSpecialist(BaseSpecialist):
     name = "template"
     description = "Template specialist — replace with actual description"
     source_repo = "owner/repo"
-    capabilities = ["capability_1", "capability_2"]
+    capabilities: ClassVar[list[str]] = ["capability_1", "capability_2"]
 
-    output_formats = [
+    output_formats: ClassVar[list[OutputFormat]] = [
         OutputFormat.PYTHON_API,
         OutputFormat.CLI,
         OutputFormat.MCP_SERVER,
@@ -29,7 +31,7 @@ class TemplateSpecialist(BaseSpecialist):
         OutputFormat.REST_API,
     ]
 
-    tools = [
+    tools: ClassVar[list[Tool]] = [
         Tool(name="example_tool", description="Replace with actual tool description"),
     ]
 

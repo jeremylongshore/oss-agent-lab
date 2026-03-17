@@ -12,7 +12,6 @@ import argparse
 import json
 from pathlib import Path
 
-
 BEADS_FILE = Path(".beads/issues.jsonl")
 
 

@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import ClassVar
 
 from oss_agent_lab.contracts import SpecialistRequest, SpecialistResponse
 
@@ -24,7 +24,7 @@ class Tool:
 
     name: str
     description: str
-    parameters: Optional[dict] = field(default=None)
+    parameters: dict | None = field(default=None)
 
 
 class BaseSpecialist(ABC):
@@ -41,12 +41,12 @@ class BaseSpecialist(ABC):
         tools: List of Tool instances available to this specialist.
     """
 
-    name: str = ""
-    description: str = ""
-    source_repo: str = ""
-    capabilities: list[str] = []
-    output_formats: list[OutputFormat] = []
-    tools: list[Tool] = []
+    name: ClassVar[str] = ""
+    description: ClassVar[str] = ""
+    source_repo: ClassVar[str] = ""
+    capabilities: ClassVar[list[str]] = []
+    output_formats: ClassVar[list["OutputFormat"]] = []
+    tools: ClassVar[list[Tool]] = []
 
     @abstractmethod
     async def execute(self, request: SpecialistRequest) -> SpecialistResponse:
