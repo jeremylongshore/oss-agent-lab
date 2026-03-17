@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from oss_agent_lab.contracts import SpecialistRequest, SpecialistResponse
 
@@ -24,7 +24,7 @@ class Tool:
 
     name: str
     description: str
-    parameters: dict | None = field(default=None)
+    parameters: dict[str, Any] | None = field(default=None)
 
 
 class BaseSpecialist(ABC):
@@ -60,7 +60,7 @@ class BaseSpecialist(ABC):
         """
         ...
 
-    def get_skill_metadata(self) -> dict:
+    def get_skill_metadata(self) -> dict[str, Any]:
         """Return SKILL.md-compatible metadata for this specialist.
 
         Returns:

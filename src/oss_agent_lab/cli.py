@@ -7,14 +7,14 @@ console = Console()
 
 @click.group()
 @click.version_option()
-def main():
+def main() -> None:
     """OSS Agent Lab - Turn trending repos into instant capabilities."""
     pass
 
 
 @main.command()
 @click.argument("query")
-def run(query: str):
+def run(query: str) -> None:
     """Run a natural language query through the agent pipeline."""
     console.print("[bold]OSS Agent Lab[/bold] v0.1.0")
     console.print(f"Query: {query}")
@@ -24,7 +24,7 @@ def run(query: str):
 
 @main.command()
 @click.argument("repo")
-def score(repo: str):
+def score(repo: str) -> None:
     """Score a GitHub repo using the Capability Scoring Engine."""
     console.print(f"[bold]Scoring:[/bold] {repo}")
     console.print("[yellow]Scoring engine not yet implemented.[/yellow]")
@@ -32,7 +32,7 @@ def score(repo: str):
 
 
 @main.command()
-def specialists():
+def specialists() -> None:
     """List registered specialists."""
     console.print("[bold]Registered Specialists:[/bold]")
     console.print("[yellow]Registry not yet implemented.[/yellow]")

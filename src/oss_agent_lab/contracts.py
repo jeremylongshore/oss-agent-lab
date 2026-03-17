@@ -10,7 +10,7 @@ class Query(BaseModel):
 
     user_input: str
     session_id: str | None = None
-    context: dict | None = None
+    context: dict[str, Any] | None = None
 
 
 class Intent(BaseModel):
@@ -19,7 +19,7 @@ class Intent(BaseModel):
     action: str
     domain: str
     confidence: float = Field(ge=0.0, le=1.0)
-    parameters: dict = Field(default_factory=dict)
+    parameters: dict[str, Any] = Field(default_factory=dict)
 
 
 class SpecialistRequest(BaseModel):
@@ -37,7 +37,7 @@ class SpecialistResponse(BaseModel):
     specialist_name: str
     status: Literal["success", "error", "partial"]
     result: Any
-    metadata: dict | None = None
+    metadata: dict[str, Any] | None = None
     duration_ms: float | None = None
 
 
@@ -45,5 +45,5 @@ class SessionContext(BaseModel):
     """Session state for multi-turn conversations."""
 
     session_id: str
-    history: list[dict] = Field(default_factory=list)
-    memory: dict | None = None
+    history: list[dict[str, Any]] = Field(default_factory=list)
+    memory: dict[str, Any] | None = None
