@@ -1,5 +1,8 @@
 """Tests for inter-agent contract schemas."""
 
+import pytest
+from pydantic import ValidationError
+
 from oss_agent_lab.contracts import (
     Intent,
     Query,
@@ -28,9 +31,21 @@ class TestIntent:
         assert i.action == "research"
         assert i.confidence == 0.95
 
-    def test_confidence_bounds(self):
+    def test_confidence_lower_bound(self):
         i = Intent(action="test", domain="test", confidence=0.0, parameters={})
         assert i.confidence == 0.0
+
+    def test_confidence_upper_bound(self):
+        i = Intent(action="test", domain="test", confidence=1.0, parameters={})
+        assert i.confidence == 1.0
+
+    def test_confidence_too_high(self):
+        with pytest.raises(ValidationError):
+            Intent(action="test", domain="test", confidence=1.5, parameters={})
+
+    def test_confidence_negative(self):
+        with pytest.raises(ValidationError):
+            Intent(action="test", domain="test", confidence=-0.1, parameters={})
 
 
 class TestSpecialistRequest:

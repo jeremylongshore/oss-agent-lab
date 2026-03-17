@@ -2,31 +2,10 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
-
 import pytest
+from helpers import make_request
 
-from oss_agent_lab.contracts import Intent, Query, SpecialistRequest, SpecialistResponse
-
-
-def _make_request(
-    specialist_name: str,
-    user_input: str,
-    action: str = "research",
-    domain: str = "ai",
-    **params: object,
-) -> SpecialistRequest:
-    return SpecialistRequest(
-        intent=Intent(
-            action=action,
-            domain=domain,
-            confidence=0.9,
-            parameters=dict(params),
-        ),
-        query=Query(user_input=user_input),
-        specialist_name=specialist_name,
-    )
-
+from oss_agent_lab.contracts import SpecialistResponse
 
 # ---------------------------------------------------------------------------
 # Browser AI
@@ -39,7 +18,7 @@ class TestBrowserAi:
         from agents.specialists.browser_ai.agent import BrowserAiSpecialist
 
         s = BrowserAiSpecialist()
-        req = _make_request(
+        req = make_request(
             "browser_ai",
             "Scrape example.com",
             action="browse",
@@ -57,6 +36,7 @@ class TestBrowserAi:
         assert s.name == "browser_ai"
         assert s.source_repo == "lightpanda-io/browser"
         assert len(s.tools) >= 3
+        assert any(t.name == "navigate" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.browser_ai.tools import (
@@ -65,9 +45,18 @@ class TestBrowserAi:
             take_screenshot,
         )
 
-        assert isinstance(navigate("https://example.com"), dict)
-        assert isinstance(extract_content("https://example.com"), dict)
-        assert isinstance(take_screenshot("https://example.com"), dict)
+        nav = navigate("https://example.com")
+        assert "status_code" in nav
+        assert "title" in nav
+        assert "url" in nav
+
+        content = extract_content("https://example.com")
+        assert "content" in content
+        assert "element_count" in content
+
+        screenshot = take_screenshot("https://example.com")
+        assert "screenshot_path" in screenshot
+        assert "dimensions" in screenshot
 
 
 # ---------------------------------------------------------------------------
@@ -81,7 +70,7 @@ class TestKnowledgeGraph:
         from agents.specialists.knowledge_graph.agent import KnowledgeGraphSpecialist
 
         s = KnowledgeGraphSpecialist()
-        req = _make_request(
+        req = make_request(
             "knowledge_graph",
             "Build graph of repo dependencies",
             action="knowledge_graph",
@@ -97,6 +86,7 @@ class TestKnowledgeGraph:
         s = KnowledgeGraphSpecialist()
         assert s.name == "knowledge_graph"
         assert len(s.tools) >= 3
+        assert any(t.name == "build_graph" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.knowledge_graph.tools import (
@@ -106,9 +96,15 @@ class TestKnowledgeGraph:
         )
 
         graph = build_graph("test_source")
-        assert isinstance(graph, dict)
-        assert isinstance(query_graph("test query"), dict)
-        assert isinstance(find_relationships("entity_a", "entity_b"), dict)
+        assert "graph_id" in graph
+        assert "node_count" in graph
+
+        query_result = query_graph("test query")
+        assert "results" in query_result
+
+        rels = find_relationships("entity_a", "entity_b")
+        assert "paths" in rels
+        assert "relationship_types" in rels
 
 
 # ---------------------------------------------------------------------------
@@ -122,7 +118,7 @@ class TestStockAnalyst:
         from agents.specialists.stock_analyst.agent import StockAnalystSpecialist
 
         s = StockAnalystSpecialist()
-        req = _make_request(
+        req = make_request(
             "stock_analyst",
             "Analyze AAPL",
             action="analyze",
@@ -140,6 +136,7 @@ class TestStockAnalyst:
         assert s.name == "stock_analyst"
         assert "finance" in s.capabilities or "analyze" in s.capabilities
         assert len(s.tools) >= 3
+        assert any(t.name == "analyze_ticker" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.stock_analyst.tools import (
@@ -148,9 +145,17 @@ class TestStockAnalyst:
             technical_indicators,
         )
 
-        assert isinstance(analyze_ticker("AAPL"), dict)
-        assert isinstance(technical_indicators("AAPL"), dict)
-        assert isinstance(news_sentiment("AAPL"), dict)
+        ticker_result = analyze_ticker("AAPL")
+        assert "ticker" in ticker_result
+        assert "recommendation" in ticker_result
+
+        indicators = technical_indicators("AAPL")
+        assert "ticker" in indicators
+        assert "indicators_computed" in indicators
+
+        sentiment = news_sentiment("AAPL")
+        assert "ticker" in sentiment
+        assert "overall_sentiment" in sentiment
 
 
 # ---------------------------------------------------------------------------
@@ -164,7 +169,7 @@ class TestOpinionAnalyst:
         from agents.specialists.opinion_analyst.agent import OpinionAnalystSpecialist
 
         s = OpinionAnalystSpecialist()
-        req = _make_request(
+        req = make_request(
             "opinion_analyst",
             "Analyze sentiment of this review",
             action="sentiment",
@@ -181,6 +186,7 @@ class TestOpinionAnalyst:
         assert s.name == "opinion_analyst"
         assert "sentiment" in s.capabilities
         assert len(s.tools) >= 3
+        assert any(t.name == "analyze_sentiment" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.opinion_analyst.tools import (
@@ -190,14 +196,17 @@ class TestOpinionAnalyst:
         )
 
         sent = analyze_sentiment("This product is great!")
-        assert isinstance(sent, dict)
         assert "sentiment" in sent
+        assert "confidence" in sent
+        assert "overall_score" in sent
 
         stance = detect_stance("I support this policy", "policy")
-        assert isinstance(stance, dict)
+        assert "stance" in stance
+        assert "confidence" in stance
 
         bias = measure_bias("This is clearly the best option ever!!!")
-        assert isinstance(bias, dict)
+        assert "overall_bias_score" in bias
+        assert "dimensions" in bias
 
 
 # ---------------------------------------------------------------------------
@@ -211,7 +220,7 @@ class TestGuiAgent:
         from agents.specialists.gui_agent.agent import GuiAgentSpecialist
 
         s = GuiAgentSpecialist()
-        req = _make_request(
+        req = make_request(
             "gui_agent",
             "Click the login button",
             action="gui_automation",
@@ -227,6 +236,7 @@ class TestGuiAgent:
         s = GuiAgentSpecialist()
         assert s.name == "gui_agent"
         assert len(s.tools) >= 3
+        assert any(t.name == "detect_elements" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.gui_agent.tools import (
@@ -236,13 +246,16 @@ class TestGuiAgent:
         )
 
         elements = detect_elements("https://example.com")
-        assert isinstance(elements, dict)
+        assert "elements" in elements
+        assert "element_count" in elements
 
         interaction = interact_element("elem_1")
-        assert isinstance(interaction, dict)
+        assert "success" in interaction
+        assert "action_performed" in interaction
 
         form = fill_form("https://example.com", {"username": "test"})
-        assert isinstance(form, dict)
+        assert "fields_filled" in form
+        assert "success" in form
 
 
 # ---------------------------------------------------------------------------
@@ -256,7 +269,7 @@ class TestSandbox:
         from agents.specialists.sandbox.agent import SandboxSpecialist
 
         s = SandboxSpecialist()
-        req = _make_request(
+        req = make_request(
             "sandbox",
             "Run print('hello')",
             action="execute",
@@ -273,6 +286,7 @@ class TestSandbox:
         assert s.name == "sandbox"
         assert "execute" in s.capabilities or "code_execution" in s.capabilities
         assert len(s.tools) >= 3
+        assert any(t.name == "execute_code" for t in s.tools)
 
     def test_tools(self) -> None:
         from agents.specialists.sandbox.tools import (
@@ -282,90 +296,137 @@ class TestSandbox:
         )
 
         result = execute_code("print('hello')")
-        assert isinstance(result, dict)
+        assert "stdout" in result
+        assert "exit_code" in result
 
         validation = validate_code("print('hello')")
-        assert isinstance(validation, dict)
+        assert "valid" in validation
+        assert "errors" in validation
 
         runtimes = list_runtimes()
-        assert isinstance(runtimes, dict)
+        assert "runtimes" in runtimes
+        assert "total_count" in runtimes
 
 
 # ---------------------------------------------------------------------------
 # All-specialist consistency checks
 # ---------------------------------------------------------------------------
 
+_ALL_SPECIALIST_CLASSES = [
+    ("agents.specialists.autoresearch.agent", "AutoresearchSpecialist"),
+    ("agents.specialists.swarm_predict.agent", "SwarmPredictSpecialist"),
+    ("agents.specialists.deer_flow.agent", "DeerFlowSpecialist"),
+    ("agents.specialists.browser_ai.agent", "BrowserAiSpecialist"),
+    ("agents.specialists.knowledge_graph.agent", "KnowledgeGraphSpecialist"),
+    ("agents.specialists.stock_analyst.agent", "StockAnalystSpecialist"),
+    ("agents.specialists.opinion_analyst.agent", "OpinionAnalystSpecialist"),
+    ("agents.specialists.gui_agent.agent", "GuiAgentSpecialist"),
+    ("agents.specialists.sandbox.agent", "SandboxSpecialist"),
+    ("agents.specialists.repo_scanner.agent", "RepoScannerSpecialist"),
+]
+
+_ALL_EXECUTE_CASES = [
+    (
+        "agents.specialists.autoresearch.agent",
+        "AutoresearchSpecialist",
+        "autoresearch",
+        "Research AI safety",
+    ),
+    (
+        "agents.specialists.swarm_predict.agent",
+        "SwarmPredictSpecialist",
+        "swarm_predict",
+        "Predict market trends",
+    ),
+    ("agents.specialists.deer_flow.agent", "DeerFlowSpecialist", "deer_flow", "Generate a report"),
+    (
+        "agents.specialists.browser_ai.agent",
+        "BrowserAiSpecialist",
+        "browser_ai",
+        "https://example.com",
+    ),
+    (
+        "agents.specialists.knowledge_graph.agent",
+        "KnowledgeGraphSpecialist",
+        "knowledge_graph",
+        "Build a code graph",
+    ),
+    (
+        "agents.specialists.stock_analyst.agent",
+        "StockAnalystSpecialist",
+        "stock_analyst",
+        "Analyze TSLA",
+    ),
+    (
+        "agents.specialists.opinion_analyst.agent",
+        "OpinionAnalystSpecialist",
+        "opinion_analyst",
+        "Check sentiment",
+    ),
+    ("agents.specialists.gui_agent.agent", "GuiAgentSpecialist", "gui_agent", "Click login button"),
+    ("agents.specialists.sandbox.agent", "SandboxSpecialist", "sandbox", "Run hello world"),
+    (
+        "agents.specialists.repo_scanner.agent",
+        "RepoScannerSpecialist",
+        "repo_scanner",
+        "test/trending-repo",
+    ),
+]
+
+
+def _import_specialist(module_path: str, class_name: str) -> object:
+    import importlib
+
+    mod = importlib.import_module(module_path)
+    return getattr(mod, class_name)()
+
 
 class TestAllSpecialistConsistency:
     """Verify all 10 specialists follow the same contract."""
 
-    SPECIALIST_CLASSES: ClassVar[list[tuple[str, str]]] = [
-        ("agents.specialists.autoresearch.agent", "AutoresearchSpecialist"),
-        ("agents.specialists.swarm_predict.agent", "SwarmPredictSpecialist"),
-        ("agents.specialists.deer_flow.agent", "DeerFlowSpecialist"),
-        ("agents.specialists.browser_ai.agent", "BrowserAiSpecialist"),
-        ("agents.specialists.knowledge_graph.agent", "KnowledgeGraphSpecialist"),
-        ("agents.specialists.stock_analyst.agent", "StockAnalystSpecialist"),
-        ("agents.specialists.opinion_analyst.agent", "OpinionAnalystSpecialist"),
-        ("agents.specialists.gui_agent.agent", "GuiAgentSpecialist"),
-        ("agents.specialists.sandbox.agent", "SandboxSpecialist"),
-        ("agents.specialists.repo_scanner.agent", "RepoScannerSpecialist"),
-    ]
+    @pytest.mark.parametrize(
+        "mod_path,cls_name",
+        _ALL_SPECIALIST_CLASSES,
+        ids=[c[1] for c in _ALL_SPECIALIST_CLASSES],
+    )
+    def test_has_required_attributes(self, mod_path: str, cls_name: str) -> None:
+        s = _import_specialist(mod_path, cls_name)
+        assert hasattr(s, "name") and len(s.name) > 0, f"{cls_name} missing/empty name"
+        assert hasattr(s, "description"), f"{cls_name} missing description"
+        assert hasattr(s, "source_repo"), f"{cls_name} missing source_repo"
+        assert hasattr(s, "capabilities") and len(s.capabilities) >= 1, (
+            f"{cls_name} no capabilities"
+        )
+        assert hasattr(s, "output_formats"), f"{cls_name} missing output_formats"
+        assert hasattr(s, "tools") and len(s.tools) >= 1, f"{cls_name} no tools"
 
-    def _import_specialist(self, module_path: str, class_name: str) -> object:
-        import importlib
+    @pytest.mark.parametrize(
+        "mod_path,cls_name",
+        _ALL_SPECIALIST_CLASSES,
+        ids=[c[1] for c in _ALL_SPECIALIST_CLASSES],
+    )
+    def test_has_skill_metadata(self, mod_path: str, cls_name: str) -> None:
+        s = _import_specialist(mod_path, cls_name)
+        meta = s.get_skill_metadata()
+        assert "name" in meta, f"{cls_name} metadata missing name"
+        assert "source_repo" in meta, f"{cls_name} metadata missing source_repo"
+        assert "capabilities" in meta, f"{cls_name} metadata missing capabilities"
+        assert "tools" in meta, f"{cls_name} metadata missing tools"
 
-        mod = importlib.import_module(module_path)
-        return getattr(mod, class_name)()
-
-    def test_all_have_required_attributes(self) -> None:
-        for mod_path, cls_name in self.SPECIALIST_CLASSES:
-            s = self._import_specialist(mod_path, cls_name)
-            assert hasattr(s, "name"), f"{cls_name} missing name"
-            assert hasattr(s, "description"), f"{cls_name} missing description"
-            assert hasattr(s, "source_repo"), f"{cls_name} missing source_repo"
-            assert hasattr(s, "capabilities"), f"{cls_name} missing capabilities"
-            assert hasattr(s, "output_formats"), f"{cls_name} missing output_formats"
-            assert hasattr(s, "tools"), f"{cls_name} missing tools"
-            assert len(s.name) > 0, f"{cls_name} has empty name"
-            assert len(s.capabilities) >= 1, f"{cls_name} has no capabilities"
-            assert len(s.tools) >= 1, f"{cls_name} has no tools"
-
-    def test_all_have_skill_metadata(self) -> None:
-        for mod_path, cls_name in self.SPECIALIST_CLASSES:
-            s = self._import_specialist(mod_path, cls_name)
-            meta = s.get_skill_metadata()
-            assert "name" in meta, f"{cls_name} metadata missing name"
-            assert "source_repo" in meta, f"{cls_name} metadata missing source_repo"
-            assert "capabilities" in meta, f"{cls_name} metadata missing capabilities"
-            assert "tools" in meta, f"{cls_name} metadata missing tools"
-
+    @pytest.mark.parametrize(
+        "mod_path,cls_name,name,query",
+        _ALL_EXECUTE_CASES,
+        ids=[c[2] for c in _ALL_EXECUTE_CASES],
+    )
     @pytest.mark.asyncio
-    async def test_all_execute_successfully(self) -> None:
-        test_cases = [
-            ("autoresearch", "Research AI safety"),
-            ("swarm_predict", "Predict market trends"),
-            ("deer_flow", "Generate a report"),
-            ("browser_ai", "https://example.com"),
-            ("knowledge_graph", "Build a code graph"),
-            ("stock_analyst", "Analyze TSLA"),
-            ("opinion_analyst", "Check sentiment"),
-            ("gui_agent", "Click login button"),
-            ("sandbox", "Run hello world"),
-            ("repo_scanner", "test/trending-repo"),
-        ]
-        for (mod_path, cls_name), (name, query) in zip(
-            self.SPECIALIST_CLASSES,
-            test_cases,
-            strict=True,
-        ):
-            s = self._import_specialist(mod_path, cls_name)
-            req = _make_request(name, query)
-            resp = await s.execute(req)
-            assert isinstance(resp, SpecialistResponse), (
-                f"{cls_name} didn't return SpecialistResponse"
-            )
-            assert resp.status == "success", f"{cls_name} status={resp.status}"
-            assert resp.specialist_name == name, (
-                f"{cls_name} wrong specialist_name: {resp.specialist_name}"
-            )
+    async def test_execute_successfully(
+        self, mod_path: str, cls_name: str, name: str, query: str
+    ) -> None:
+        s = _import_specialist(mod_path, cls_name)
+        req = make_request(name, query)
+        resp = await s.execute(req)
+        assert isinstance(resp, SpecialistResponse), f"{cls_name} didn't return SpecialistResponse"
+        assert resp.status == "success", f"{cls_name} status={resp.status}"
+        assert resp.specialist_name == name, (
+            f"{cls_name} wrong specialist_name: {resp.specialist_name}"
+        )

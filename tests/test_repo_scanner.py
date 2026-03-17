@@ -6,27 +6,9 @@ from pathlib import Path
 from typing import ClassVar
 
 import pytest
+from helpers import make_request
 
-from oss_agent_lab.contracts import Intent, Query, SpecialistRequest, SpecialistResponse
-
-
-def _make_request(
-    specialist_name: str,
-    user_input: str,
-    action: str = "research",
-    domain: str = "ai",
-    **params: object,
-) -> SpecialistRequest:
-    return SpecialistRequest(
-        intent=Intent(
-            action=action,
-            domain=domain,
-            confidence=0.9,
-            parameters=dict(params),
-        ),
-        query=Query(user_input=user_input),
-        specialist_name=specialist_name,
-    )
+from oss_agent_lab.contracts import SpecialistResponse
 
 
 class TestRepoScanner:
@@ -39,7 +21,7 @@ class TestRepoScanner:
         monkeypatch.setattr(tools_mod, "_SPECIALISTS_DIR", tmp_path)
 
         s = RepoScannerSpecialist()
-        req = _make_request(
+        req = make_request(
             "repo_scanner",
             "Scan myorg/mypkg and scaffold a specialist",
             action="scan",
@@ -151,7 +133,7 @@ class TestRepoScannerConsistency:
         monkeypatch.setattr(tools_mod, "_SPECIALISTS_DIR", tmp_path)
 
         s = RepoScannerSpecialist()
-        req = _make_request(
+        req = make_request(
             "repo_scanner",
             "Scan someowner/someproject",
             action="scan",

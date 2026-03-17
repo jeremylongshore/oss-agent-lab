@@ -52,8 +52,8 @@ jobs:
           echo "Coverage: ${coverage_pct}%"
           # Threshold accounts for async network code in scoring/sources/ and CLI
           # entry points that require live HTTP — these are excluded from unit tests.
-          if [ "$coverage_pct" -lt 60 ]; then
-            echo "FAIL: Coverage ${coverage_pct}% is below 60% threshold"
+          if [ "$coverage_pct" -lt 65 ]; then
+            echo "FAIL: Coverage ${coverage_pct}% is below 65% threshold"
             exit 1
           fi
 

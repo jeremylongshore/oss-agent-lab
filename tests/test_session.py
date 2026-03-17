@@ -114,9 +114,12 @@ class TestSessionMemory:
     async def test_recall_relevance_ordering(self) -> None:
         mem = SessionMemory()
         await mem.store({"content": "cats and dogs"})
-        await mem.store({"content": "AI research on transformers and LLMs in AI"})
-        await mem.store({"content": "AI models"})
+        await mem.store({"content": "AI research on transformers"})
+        await mem.store({"content": "AI models and AI safety in AI research"})
 
-        results = await mem.recall("AI")
-        # The entry with more AI mentions should rank higher
+        results = await mem.recall("AI models safety")
         assert len(results) >= 2
+        # "AI models and AI safety in AI research" matches 3 terms; "AI research on
+        # transformers" matches only 1 ("ai").  Higher match count ranks first.
+        assert "models" in str(results[0]).lower()
+        assert "safety" in str(results[0]).lower()
