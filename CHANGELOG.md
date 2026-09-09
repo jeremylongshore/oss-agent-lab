@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Hardened all ten public specialist skills for skills.sh marketplace publication with production
+  metadata, bounded instructions, error handling, examples, and runtime-contract references.
+- Corrected the public skills to identify current browser, GUI, research, graph, sandbox, stock, and
+  swarm outputs as offline simulations rather than live upstream integrations.
+- Marked the `_template` fixture as non-installable so the Skills CLI no longer publishes it as an
+  eleventh end-user skill.
+- Aligned every published skill with the repository's MIT license while retaining attribution to the
+  differently licensed projects that inspired individual interfaces.
+
 ## [1.0.0] - 2026-03-17
 
 ### Added

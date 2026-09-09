@@ -8,6 +8,8 @@
 2. Rename `TemplateSpecialist` class in `agent.py`
 3. Implement tools in `tools.py`
 4. Update `SKILL.md` frontmatter and documentation
+   - Remove `metadata.internal: true` only after every placeholder is replaced and validation passes;
+     this keeps the template and unfinished copies out of skills.sh discovery.
 5. Add tests: `tests/test_your_name.py`
 6. Open a PR
 

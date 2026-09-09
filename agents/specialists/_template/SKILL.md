@@ -17,6 +17,8 @@ output_formats:
   - mcp_server
   - agent_skill
   - rest_api
+metadata:
+  internal: true
 ---
 
 # Template Specialist

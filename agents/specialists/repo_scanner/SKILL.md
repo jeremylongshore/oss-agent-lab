@@ -1,10 +1,18 @@
 ---
 name: repo_scanner
+description: Estimate a repository score from its owner/name string and optionally scaffold a local specialist directory. Use when exercising OSS Agent Lab's offline repo intake prototype. Trigger with scan repo prototype.
+allowed-tools: 'Bash(python:*), Bash(oss-lab:*)'
+version: 1.1.0
+author: Intent Solutions <jeremy@intentsolutions.io>
+license: MIT
+compatibility: 'Requires Python 3.11+, an OSS Agent Lab checkout installed with pip install -e ., and explicit approval before scaffolding; scan and score outputs are deterministic simulations with no GitHub API lookup.'
+tags: [repository, scoring, scaffolding, simulation, filesystem]
+argument-hint: '[owner/repo] [--name specialist_name]'
+disable-model-invocation: true
+model: inherit
+effort: medium
 display_name: "Repo Scanner"
-description: "Meta-specialist that auto-discovers and scaffolds new specialists from trending GitHub repos"
-version: "1.0.0"
 source_repo: "jeremylongshore/oss-agent-lab"
-license: "MIT"
 tier: "core"
 capabilities:
   - auto_scaffold
@@ -26,19 +34,26 @@ output_formats:
 
 ## Overview
 
-A meta-specialist that IS the OSS Agent Lab repository acting on itself. It
-consumes the Capability Scoring Engine's signal pipeline to evaluate whether a
-candidate GitHub repo is worth wrapping as a new specialist, then
-auto-scaffolds the directory skeleton when the score crosses the threshold.
+A meta-specialist that exercises OSS Agent Lab's repository-intake shape. It derives a score from the
+literal slug and can copy the local skeleton when the synthetic score crosses the threshold.
 
 Wraps [jeremylongshore/oss-agent-lab](https://github.com/jeremylongshore/oss-agent-lab).
+
+The scanner does not contact GitHub. Structure flags, scores, and recommendations are derived from the
+repository string. Only scaffolding can write, by copying `_template` inside this checkout.
+
+## Prerequisites
+
+- Use Python 3.11+ in a local OSS Agent Lab checkout and run `pip install -e .`.
+- Provide a literal `owner/repo` slug and a safe snake_case target name.
+- Obtain explicit user approval before a scaffold write and read
+  [the runtime contract](references/runtime-contract.md).
 
 ## Capabilities
 
 - **auto_scaffold**: Materialise a new specialist directory from the `_template`
   skeleton when a repo's composite score reaches >= 80.
-- **repo_analysis**: Analyse structural signals (Python presence, tests, README,
-  licence) and infer likely capabilities from repo naming conventions.
+- **repo_analysis**: Simulate structural flags and infer likely capabilities from repo naming.
 - **specialist_generation**: Orchestrate the full scan → score → scaffold pipeline
   and surface a unified result with provenance metadata.
 
@@ -59,7 +74,14 @@ All parameters are passed via `request.intent.parameters`:
 | `repo` | `str` | *(query text)* | GitHub repo in `owner/name` format |
 | `name` | `str` | *(from scan)* | Override for the scaffolded specialist directory name |
 
-## Usage
+## Instructions
+
+1. Validate the literal `owner/repo` slug and run scan/score without claiming GitHub was queried.
+2. Present the deterministic score, recommendation, proposed target path, and intended file set.
+3. Ask for explicit approval before `scaffold_specialist` creates a directory.
+4. After creation, report the exact path and files; the generated skeleton still requires review.
+
+## Examples
 
 ### Python API
 
@@ -91,7 +113,7 @@ print(response.result.get("scaffold"))      # None or {"status": "created", "pat
 oss-lab run repo_scanner "openai/swarm"
 ```
 
-### Response Shape
+### Output shape
 
 ```json
 {
@@ -137,6 +159,19 @@ oss-lab run repo_scanner "openai/swarm"
 | 40-59 | `watch` | Add to watch list; re-score weekly |
 | < 40  | `skip` | Not ready for wrapping |
 
-## Source
+## Output
+
+Read-only operations return simulated structural signals and scores. Scaffolding returns `created`
+only after copying the local template; if the template is absent it returns `simulated` and writes
+nothing. Neither status proves that the source repository exists or is suitable.
+
+## Error Handling
+
+- Reject malformed repository slugs, unsafe names, and an existing target directory.
+- Treat a missing template as no-write simulation, not successful creation.
+- Never overwrite a specialist or broaden the destination beyond `agents/specialists/<name>`.
+
+## Resources
 
 Wraps [jeremylongshore/oss-agent-lab](https://github.com/jeremylongshore/oss-agent-lab).
+See [the runtime contract](references/runtime-contract.md) for scoring and write boundaries.
