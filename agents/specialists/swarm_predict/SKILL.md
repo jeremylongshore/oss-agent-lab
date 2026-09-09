@@ -1,10 +1,17 @@
 ---
 name: swarm_predict
-display_name: Swarm Prediction Specialist
-description: Ensemble predictions via swarm intelligence with multi-model voting and consensus
-version: 0.1.0
-source_repo: 666ghj/MiroFish
+description: Generate synthetic per-model values and exercise numeric or categorical consensus aggregation. Use when testing the Swarm Prediction contract, not when forecasting real events. Trigger with simulate swarm prediction.
+allowed-tools: 'Bash(python:*), Bash(oss-lab:*)'
+version: 0.2.0
+author: Intent Solutions <jeremy@intentsolutions.io>
 license: MIT
+compatibility: 'Requires Python 3.11+ and an OSS Agent Lab checkout installed with pip install -e .; no models or external data sources are called, and generated values are not forecasts.'
+tags: [ensemble, consensus, simulation, prediction, offline]
+argument-hint: '[target] [--num-models N] [--method weighted_vote|majority_vote|mean]'
+model: inherit
+effort: low
+display_name: Swarm Prediction Specialist
+source_repo: 666ghj/MiroFish
 tier: core
 capabilities:
   - predict
@@ -27,33 +34,36 @@ output_formats:
 
 ## Overview
 
-`swarm_predict` wraps the swarm intelligence prediction patterns from
-[666ghj/MiroFish](https://github.com/666ghj/MiroFish).  Rather than relying
-on a single model, it spins up a configurable swarm of independent model
-agents, collects their individual predictions, and resolves a consensus
-through weighted aggregation and agreement scoring.
+`swarm_predict` mirrors aggregation patterns from
+[666ghj/MiroFish](https://github.com/666ghj/MiroFish). It creates configurable virtual model
+descriptors, generates numeric fixture values from the target string, and resolves an arithmetic
+consensus through weighted aggregation and agreement scoring.
 
-The specialist is fully stateless — each request spawns a fresh swarm and
-returns a self-contained result dict.  It supports numeric and categorical
-prediction targets and exposes three aggregation strategies: weighted vote,
-majority vote, and simple mean.
+The specialist is stateless and returns a self-contained result dict. The standalone aggregation tool
+also supports caller-supplied numeric or categorical values through weighted vote, majority vote, or
+simple mean.
+
+The current end-to-end specialist does not call any model. It generates target-derived numeric fixture
+values, then exercises the real aggregation functions. Its result is not a forecast.
+
+## Prerequisites
+
+- Use Python 3.11+ in a local OSS Agent Lab checkout and run `pip install -e .`.
+- Provide a test target, a positive swarm size, and a threshold between 0 and 1.
+- Read [the runtime contract](references/runtime-contract.md) for aggregation semantics.
 
 ## Capabilities
 
-- **predict**: Route any prediction target through the swarm pipeline and
-  receive a consensus value with confidence score.
-- **ensemble**: Combine outputs from N independent model agents (default 5)
-  to reduce variance and single-model bias.
-- **swarm_intelligence**: Each agent operates independently before results
-  are merged, mirroring biological swarm behaviour.
-- **consensus**: Agreement ratio and blended confidence score surface when
-  models agree strongly enough to act on the prediction.
+- **predict**: Derive numeric fixture values from a target and aggregate them.
+- **ensemble**: Combine N synthetic or caller-supplied values.
+- **swarm_intelligence**: Exercise virtual model descriptors without model execution.
+- **consensus**: Compute an agreement ratio and blended arithmetic confidence.
 
 ## Tools
 
 | Tool | Description | Side Effects |
 |------|-------------|--------------|
-| `create_prediction_swarm` | Initialise N model agents for a given target | None |
+| `create_prediction_swarm` | Initialise N virtual model descriptors | None |
 | `aggregate_predictions` | Merge individual predictions via weighted/majority/mean vote | None |
 | `evaluate_consensus` | Score agreement ratio and emit a recommendation | None |
 
@@ -76,7 +86,7 @@ majority vote, and simple mean.
   as a fallback.  Suited for classification targets.
 - **mean** — unweighted average.  Baseline; useful for ablation.
 
-## Response shape
+## Output
 
 ```python
 {
@@ -89,7 +99,14 @@ majority vote, and simple mean.
 }
 ```
 
-## Usage
+## Instructions
+
+1. Choose a target, swarm size, aggregation method, and consensus threshold.
+2. Run the specialist for synthetic numeric fixtures, or call aggregation with caller-supplied values.
+3. Report agreement and confidence as arithmetic over inputs, not calibrated predictive accuracy.
+4. Do not use the recommendation for financial, medical, safety, or other consequential decisions.
+
+## Examples
 
 ### Python API
 
@@ -130,6 +147,14 @@ oss-lab run swarm_predict "next quarter revenue" \
   --param threshold=0.8
 ```
 
-## Source
+## Error Handling
+
+- Reject a swarm smaller than one, an empty prediction list, unknown method, or invalid threshold.
+- Validate caller-supplied prediction provenance before interpreting a consensus.
+- Treat `high_confidence_proceed` as a test label, not authorization to act.
+
+## Resources
 
 Wraps [666ghj/MiroFish](https://github.com/666ghj/MiroFish).
+The local implementation only exercises virtual descriptors and aggregation. See
+[the runtime contract](references/runtime-contract.md).

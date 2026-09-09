@@ -1,10 +1,17 @@
 ---
 name: browser_ai
-display_name: Browser AI Specialist
-description: Headless web automation for AI — navigate pages, extract DOM content, and capture screenshots
-version: 0.1.0
-source_repo: lightpanda-io/browser
+description: Simulate browser navigation metadata, selector extraction, and screenshot paths without network or file writes. Use when testing the Browser AI contract offline. Trigger with simulate browser or browser contract.
+allowed-tools: 'Bash(python:*), Bash(oss-lab:*)'
+version: 0.2.0
+author: Intent Solutions <jeremy@intentsolutions.io>
 license: MIT
+compatibility: 'Requires Python 3.11+ and an OSS Agent Lab checkout installed with pip install -e .; this prototype does not launch Lightpanda, fetch URLs, parse a DOM, or create PNG files.'
+tags: [browser, simulation, offline, automation, prototype]
+argument-hint: '[URL] [--selector CSS] [--format text|html|markdown]'
+model: inherit
+effort: low
+display_name: Browser AI Specialist
+source_repo: lightpanda-io/browser
 tier: core
 capabilities:
   - browse
@@ -27,29 +34,33 @@ output_formats:
 
 ## Overview
 
-The Browser AI specialist wraps [lightpanda-io/browser](https://github.com/lightpanda-io/browser)
-— a lightweight, Zig-written headless browser engine built specifically for AI agent workloads.
-It provides a composable pipeline for web navigation, DOM content extraction, and screenshot
-capture, all accessible through a single `execute()` call or as standalone tool functions.
+The Browser AI specialist mirrors part of the [lightpanda-io/browser](https://github.com/lightpanda-io/browser)
+interface for offline contract tests. It composes synthetic navigation, extraction, and screenshot
+metadata through one `execute()` call or standalone Python functions.
+
+The current implementation is synthetic. It parses the URL string, derives deterministic metadata,
+returns synthetic content, and constructs a PNG path without fetching a page or writing a file.
+
+## Prerequisites
+
+- Use Python 3.11+ in a local OSS Agent Lab checkout and run `pip install -e .`.
+- Supply an `http://` or `https://` URL; do not expect the target to be contacted.
+- Read [the runtime contract](references/runtime-contract.md) before interpreting outputs.
 
 ## Capabilities
 
-- **browse**: Load any HTTP/HTTPS URL in a headless browser context, following redirects and
-  capturing page-ready timing.
-- **web_automation**: Drive the full browser pipeline — navigate, extract, screenshot — in a
-  single request with configurable parameters.
-- **scrape**: Extract structured content from the rendered DOM using CSS selectors. Supports
-  plain text, raw HTML, and Markdown output formats.
-- **screenshot**: Capture a PNG screenshot of the fully-rendered page at an arbitrary viewport
-  size. Returns the file path and image dimensions.
+- **browse**: Validate an HTTP(S) URL string and synthesize redirect, status, title, and timing fields.
+- **web_automation**: Exercise the three-stage result contract in one local request.
+- **scrape**: Return format-shaped synthetic content for a small selector allowlist.
+- **screenshot**: Validate a viewport and return an unwritten PNG path plus dimensions.
 
 ## Tools
 
 | Tool | Description | Parameters | Side Effects |
 |------|-------------|------------|--------------|
-| `navigate` | Load a URL and return load metadata | `url`, `wait_for` | None |
-| `extract_content` | Extract DOM content via CSS selector | `url`, `selector`, `format` | None |
-| `take_screenshot` | Capture a PNG of the rendered page | `url`, `viewport` | Writes PNG to `/tmp/browser_ai/screenshots/` |
+| `navigate` | Synthesize URL load metadata | `url`, `wait_for` | None |
+| `extract_content` | Synthesize selector-shaped content | `url`, `selector`, `format` | None |
+| `take_screenshot` | Construct PNG path metadata | `url`, `viewport` | None; no file is written |
 
 ### Tool Parameter Reference
 
@@ -73,19 +84,26 @@ capture, all accessible through a single `execute()` call or as standalone tool 
 SpecialistRequest
       │
       ▼
-  navigate(url, wait_for)
+  simulate navigate(url, wait_for)
       │  → status_code, title, final_url, load_time_ms
       ▼
-  extract_content(final_url, selector, format)
+  simulate extract_content(final_url, selector, format)
       │  → content, selector_matched, element_count
       ▼
-  take_screenshot(final_url, viewport)
+  simulate take_screenshot(final_url, viewport)
       │  → screenshot_path, dimensions, format
       ▼
   SpecialistResponse(result={url, navigation, extraction, screenshot})
 ```
 
-## Usage
+## Instructions
+
+1. Validate that the input is a fully qualified HTTP(S) URL.
+2. Choose a supported selector, output format, and positive `WIDTHxHEIGHT` viewport.
+3. Run the specialist or an individual tool through the local Python package.
+4. Report all page, content, timing, status, and screenshot values as synthetic fixtures.
+
+## Examples
 
 ### Python API
 
@@ -153,8 +171,23 @@ result = take_screenshot(url="https://example.com", viewport="1280x800")
 print(result["screenshot_path"])
 ```
 
-## Source
+## Output
+
+The specialist returns `navigation`, `extraction`, and `screenshot` dictionaries. The screenshot path
+is metadata only: no PNG is created. A selector outside the small built-in allowlist returns zero
+matches, regardless of the real page.
+
+## Error Handling
+
+- Reject empty URLs, non-HTTP(S) schemes, unsupported content formats, and malformed viewports.
+- Treat a returned 200 or 404 as string-derived simulation, not an observed HTTP response.
+- Do not retry or troubleshoot network access because this implementation performs none.
+
+## Resources
 
 Wraps [lightpanda-io/browser](https://github.com/lightpanda-io/browser) — a fast, memory-efficient
 headless browser written in Zig, designed to serve AI agent workloads with low overhead and a
 clean programmatic API.
+
+The local specialist is inspired by that interface but does not embed Lightpanda. See
+[the runtime contract](references/runtime-contract.md).

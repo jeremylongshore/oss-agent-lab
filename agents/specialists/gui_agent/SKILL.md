@@ -1,10 +1,17 @@
 ---
 name: gui_agent
+description: Simulate element detection, UI actions, and form-validation results without opening a browser or changing a page. Use when exercising the GUI Agent contract offline. Trigger with simulate GUI or page-agent prototype.
+allowed-tools: 'Bash(python:*), Bash(oss-lab:*)'
+version: 0.2.0
+author: Intent Solutions <jeremy@intentsolutions.io>
+license: MIT
+compatibility: 'Requires Python 3.11+ and an OSS Agent Lab checkout installed with pip install -e .; current tools synthesize page elements and interaction results and perform no browser or network I/O.'
+tags: [gui, browser, simulation, forms, prototype]
+argument-hint: '[instruction] [--url URL]'
+model: inherit
+effort: low
 display_name: GUI Agent Specialist
-description: Natural language web UI control — element detection, targeted interaction, and automated form filling
-version: 0.1.0
 source_repo: alibaba/page-agent
-license: Apache-2.0
 tier: core
 capabilities:
   - gui_automation
@@ -27,37 +34,39 @@ output_formats:
 
 ## Overview
 
-The GUI Agent specialist wraps the [alibaba/page-agent](https://github.com/alibaba/page-agent)
-natural-language web UI control framework into a composable OSS Agent Lab specialist. Given a
-plain-English instruction and a target URL, it:
+The GUI Agent specialist mirrors a small portion of the
+[alibaba/page-agent](https://github.com/alibaba/page-agent) interface for local contract tests. Given
+an instruction and URL string, it generates login-form fixtures, returns an action-state record, and
+applies simple validation tokens to supplied form data.
 
-1. **Detects elements** — discovers interactive UI elements on the page, optionally narrowed by
-   a semantic description of the target.
-2. **Interacts** — performs the requested action (click, type, hover, focus, or clear) on the
-   matched element.
-3. **Fills forms** — when form data is provided, populates every field, validates values, and
-   reports whether the form is ready to submit.
+The current implementation never opens the URL. It returns a built-in element catalogue, synthetic
+interaction state, and rule-based form validation without changing any browser or remote page.
 
-Each stage is independently callable as a tool, making the specialist suitable for targeted
-automation steps as well as full end-to-end web-interaction pipelines.
+## Prerequisites
+
+- Use Python 3.11+ in a local OSS Agent Lab checkout and run `pip install -e .`.
+- Provide test-only values; do not put real passwords, tokens, or personal data in form inputs.
+- Read [the runtime contract](references/runtime-contract.md) for synthetic behavior and limits.
+
+## Authentication
+
+None. The current implementation does not contact a page or service. Do not enter live credentials;
+form values are echoed into synthetic state and are suitable only for non-sensitive test data.
 
 ## Capabilities
 
-- **gui_automation**: End-to-end pipeline that detects elements and performs actions from a
-  natural-language description.
-- **web_interaction**: Single-element actions (click, type, hover, focus, clear) driven by
-  element ID.
-- **element_detection**: Structured discovery of interactive elements on any URL, with optional
-  semantic filtering.
-- **form_filling**: Batch field population with built-in validation and submit-readiness reporting.
+- **gui_automation**: Exercise the detection/action/form response pipeline with fixture data.
+- **web_interaction**: Map click, type, hover, focus, or clear to synthetic state.
+- **element_detection**: Filter a built-in element catalogue using description words.
+- **form_filling**: Apply local field rules and return a synthetic readiness flag.
 
 ## Tools
 
 | Tool | Description | Parameters | Side Effects |
 |------|-------------|------------|--------------|
-| `detect_elements` | Detect interactive UI elements on a page | `url`, `description` | None (read-only) |
-| `interact_element` | Perform an action on a specific element | `element_id`, `action`, `value` | Modifies page state |
-| `fill_form` | Fill a web form with field-value pairs | `url`, `form_data` | Modifies page state |
+| `detect_elements` | Generate and filter login-form fixtures | `url`, `description` | None |
+| `interact_element` | Return a synthetic action state for an element ID | `element_id`, `action`, `value` | None |
+| `fill_form` | Apply local validation rules to field-value pairs | `url`, `form_data` | None |
 
 ### Tool Parameter Reference
 
@@ -95,7 +104,14 @@ SpecialistRequest
 Form filling is triggered when the `form_data` key is present and non-empty in
 `request.intent.parameters`.
 
-## Usage
+## Instructions
+
+1. Provide a URL string and a narrow natural-language element description.
+2. Call detection before interaction and use only the returned synthetic element ID.
+3. Use form filling only with non-sensitive test data.
+4. Report all elements, actions, timings, and readiness fields as simulated results.
+
+## Examples
 
 ### Python API
 
@@ -160,7 +176,7 @@ print(result["elements"])
 print(f"Found {result['element_count']} element(s)")
 ```
 
-## Response Shape
+## Output
 
 ```json
 {
@@ -188,8 +204,17 @@ print(f"Found {result['element_count']} element(s)")
 }
 ```
 
-## Source
+## Error Handling
+
+- Reject empty URL or element ID values and unsupported actions.
+- Require `value` for `type`; report form validation errors without claiming a remote form changed.
+- Do not retry network or browser operations because none occur.
+
+## Resources
 
 Wraps [alibaba/page-agent](https://github.com/alibaba/page-agent) — a natural-language
 web UI control agent that translates plain-English instructions into browser automation
 actions using vision-language models and structured element grounding.
+
+The local specialist is a simulator, not an embedded page-agent runtime. See
+[the runtime contract](references/runtime-contract.md).

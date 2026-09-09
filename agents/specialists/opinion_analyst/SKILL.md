@@ -1,12 +1,17 @@
 ---
 name: opinion_analyst
-display_name: Opinion Analyst
-description: >
-  Public opinion analysis and sentiment at scale — sentiment scoring,
-  stance detection, and multi-dimensional bias measurement.
-version: 0.1.0
-source_repo: 666ghj/BettaFish
+description: Score supplied text with deterministic keyword heuristics for sentiment, stance, and bias. Use when testing explainable offline classification behavior, not for population-level opinion claims. Trigger with analyze text heuristically.
+allowed-tools: 'Bash(python:*), Bash(oss-lab:*)'
+version: 0.2.0
+author: Intent Solutions <jeremy@intentsolutions.io>
 license: MIT
+compatibility: 'Requires Python 3.11+ and an OSS Agent Lab checkout installed with pip install -e .; the implementation uses local lexicons and rules, not BettaFish models, surveys, social feeds, or external APIs.'
+tags: [sentiment, stance, bias, heuristics, offline]
+argument-hint: '[text] [--target SUBJECT]'
+model: inherit
+effort: low
+display_name: Opinion Analyst
+source_repo: 666ghj/BettaFish
 tier: experimental
 capabilities:
   - sentiment
@@ -29,21 +34,25 @@ output_formats:
 
 ## Overview
 
-OpinionAnalyst wraps [666ghj/BettaFish](https://github.com/666ghj/BettaFish), a
-public-opinion analysis library built for high-throughput sentiment mining.  The
-specialist surfaces three core capabilities — sentiment scoring, stance detection,
-and bias measurement — as callable tools within the OSS Agent Lab pipeline.
+OpinionAnalyst mirrors three interface concepts from
+[666ghj/BettaFish](https://github.com/666ghj/BettaFish): sentiment, stance, and bias records. The local
+specialist computes them from small fixed phrase lists.
+
+The implementation is an offline keyword-and-rule heuristic. It does not run BettaFish models, ingest
+social or survey data, infer population opinion, or establish a person's beliefs or protected traits.
+
+## Prerequisites
+
+- Use Python 3.11+ in a local OSS Agent Lab checkout and run `pip install -e .`.
+- Provide text the user is authorized to analyze and avoid identity or high-stakes profiling.
+- Read [the runtime contract](references/runtime-contract.md) for heuristic limits and outputs.
 
 ## Capabilities
 
-- **sentiment**: Document-, sentence-, and aspect-level sentiment scoring with a
-  continuous score in `[-1.0, 1.0]`.
-- **opinion_analysis**: Holistic opinion mining that combines sentiment with
-  aspect extraction for nuanced understanding.
-- **stance_detection**: Determines whether the author supports, opposes, or is
-  neutral toward a named entity or claim.
-- **bias_measurement**: Measures political, emotional, framing, source-attribution,
-  and confirmation bias; returns per-dimension scores and human-readable flags.
+- **sentiment**: Count fixed positive/negative terms and optionally label three known aspects.
+- **opinion_analysis**: Exercise a structured local classification response.
+- **stance_detection**: Match fixed support/opposition phrases, then fall back to sentiment.
+- **bias_measurement**: Count fixed political, emotional, framing, source, and confirmation phrases.
 
 ## Tools
 
@@ -53,7 +62,14 @@ and bias measurement — as callable tools within the OSS Agent Lab pipeline.
 | `detect_stance` | Classify stance (support/oppose/neutral) toward a target | None |
 | `measure_bias` | Score bias across configurable dimensions, return flags | None |
 
-## Usage
+## Instructions
+
+1. Choose sentiment, stance, or bias analysis and supply the required text and target/dimensions.
+2. Run the local Python API or CLI.
+3. Report the returned label as a heuristic signal with its score and matched evidence count.
+4. Do not generalize one text sample to a person, group, electorate, or public population.
+
+## Examples
 
 ### Python API
 
@@ -116,6 +132,19 @@ result = asyncio.run(specialist.execute(request))
 oss-lab run opinion_analyst "The product quality is excellent and worth every penny."
 ```
 
-## Source
+## Output
+
+Sentiment returns a label, confidence, aspects, and score; stance returns support/oppose/neutral plus
+reasoning; bias returns requested dimension scores and flags. Values reflect built-in lexicons only.
+
+## Error Handling
+
+- Empty inputs return neutral/zero-information results; do not interpret them as measured neutrality.
+- An unknown bias dimension is scored with the tool's fallback behavior; disclose the limitation.
+- Refuse discriminatory profiling, diagnosis, or consequential decisions based on heuristic output.
+
+## Resources
 
 Wraps [666ghj/BettaFish](https://github.com/666ghj/BettaFish).
+The local code is inspired by the domain but does not embed BettaFish. See
+[the runtime contract](references/runtime-contract.md).

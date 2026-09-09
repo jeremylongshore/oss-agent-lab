@@ -1,10 +1,17 @@
 ---
 name: knowledge_graph
-display_name: Knowledge Graph Specialist
-description: Code knowledge graphs and Graph RAG — entity extraction, relationship mapping, and natural-language queries over source repositories
-version: 0.1.0
-source_repo: abhigyanpatwari/GitNexus
+description: Generate synthetic graph counts, ranked artificial entities, and relationship paths from input strings. Use when testing the Knowledge Graph response contract, not when analyzing real source code. Trigger with simulate knowledge graph.
+allowed-tools: 'Bash(python:*), Bash(oss-lab:*)'
+version: 0.2.0
+author: Intent Solutions <jeremy@intentsolutions.io>
 license: MIT
+compatibility: 'Requires Python 3.11+ and an OSS Agent Lab checkout installed with pip install -e .; inputs are hashed but never read, cloned, parsed, persisted, or queried through GitNexus or cognee.'
+tags: [knowledge-graph, graph-rag, simulation, offline, prototype]
+argument-hint: '[query] [--source STRING] [--graph-type code|document|mixed]'
+model: inherit
+effort: low
+display_name: Knowledge Graph Specialist
+source_repo: abhigyanpatwari/GitNexus
 tier: core
 capabilities:
   - knowledge_graph
@@ -32,34 +39,36 @@ output_formats:
 entity extraction and graph construction, and
 [topoteretes/cognee](https://github.com/topoteretes/cognee) for Graph RAG retrieval.
 
-Given a source artifact — repository URL, file path, or raw code — the specialist
-builds a directed knowledge graph of entities and relationships, then answers
-natural-language questions through graph traversal.  Results are returned as ranked
-entity lists, relevance scores, and explicit relationship paths, ready for downstream
-reasoning or citation.
+Given any source string, the specialist hashes that string and constructs a synthetic graph-shaped
+response. It returns artificial entity lists, relevance scores, and relationship paths for exercising
+downstream contracts. It does not parse or cite the named artifact.
 
-The specialist is stateless.  Each :meth:`execute` call builds a fresh graph and
-returns a self-contained result dict.  Graph IDs can be passed across calls to query
-a previously built graph without rebuilding.
+The specialist is stateless. Each `execute` call creates a new graph UUID and self-contained result;
+there is no previously built graph to retrieve across calls.
+
+Those descriptions are interface goals, not current data processing. The implementation hashes the
+source string and generates artificial counts, entities, scores, and paths; it has no stored graph.
+
+## Prerequisites
+
+- Use Python 3.11+ in a local OSS Agent Lab checkout and run `pip install -e .`.
+- Pass only a source identifier or sample text; paths and URLs are not opened.
+- Read [the runtime contract](references/runtime-contract.md) before using the response.
 
 ## Capabilities
 
-- **knowledge_graph**: Build a structured entity/relationship graph from code or
-  documents, scoped by traversal depth and entity type.
-- **code_analysis**: Extract modules, classes, functions, variables, and imports from
-  source repositories, surfacing dependency and call-graph structure.
-- **entity_linking**: Resolve named entities across files and modules into a unified
-  graph, deduplicating references by stable entity ID.
-- **graph_rag**: Answer natural-language queries via graph traversal and relevance
-  ranking — Graph Retrieval-Augmented Generation over structured code knowledge.
+- **knowledge_graph**: Generate graph-shaped counts and type labels from a source-string hash.
+- **code_analysis**: Exercise a code-analysis response schema with artificial entities.
+- **entity_linking**: Generate deterministic-style IDs and synthetic paths for contract tests.
+- **graph_rag**: Exercise ranking and path fields without retrieval or generation.
 
 ## Tools
 
 | Tool | Description | Side Effects |
 |------|-------------|--------------|
-| `build_graph` | Build a knowledge graph from a source artifact | None (v1 local; future: network/disk) |
-| `query_graph` | Query the graph with natural language; returns ranked entities and paths | None |
-| `find_relationships` | Find all paths between two named entities; returns types and strength | None |
+| `build_graph` | Derive synthetic graph metadata from a source string | None |
+| `query_graph` | Generate artificial ranked entities and paths | None |
+| `find_relationships` | Generate artificial paths, types, and strength | None |
 
 ## Parameters
 
@@ -77,14 +86,11 @@ a previously built graph without rebuilding.
 
 ### Graph types
 
-- **code** — extracts `module`, `class`, `function`, `variable`, `import` entities.
-  Best for source repository analysis and call-graph reasoning.
-- **document** — extracts `concept`, `section`, `claim`, `reference` entities.
-  Suited for technical documentation or research papers.
-- **mixed** — union of code and document types.  Use when the source combines
-  runnable code with rich inline documentation.
+- **code** — labels output with `module`, `class`, `function`, `variable`, and `import` types.
+- **document** — labels output with `concept`, `section`, `claim`, and `reference` types.
+- **mixed** — returns a combined synthetic type list.
 
-## Response shape
+## Output
 
 ```python
 {
@@ -111,7 +117,14 @@ a previously built graph without rebuilding.
 }
 ```
 
-## Usage
+## Instructions
+
+1. Supply a non-empty source string and query plus a supported graph type and bounded positive limits.
+2. Run the specialist through the Python API or CLI.
+3. Treat graph IDs as per-call identifiers and every entity/path as artificial fixture data.
+4. Use a real parser or graph store when the task requires claims about source code.
+
+## Examples
 
 ### Python API
 
@@ -178,7 +191,16 @@ oss-lab run knowledge_graph "dependency chain for PaymentProcessor" \
   --param entity_b=DatabaseClient
 ```
 
-## Source
+## Error Handling
+
+- Reject empty source or query values, unknown graph types, and non-positive depth/result limits.
+- Do not claim that a path or URL was read merely because the result contains a graph ID.
+- Do not cite synthetic entities or relationships as evidence about a repository.
+
+## Resources
 
 Wraps [abhigyanpatwari/GitNexus](https://github.com/abhigyanpatwari/GitNexus) and
 [topoteretes/cognee](https://github.com/topoteretes/cognee).
+
+The current local implementation is interface-only. See
+[the runtime contract](references/runtime-contract.md).
